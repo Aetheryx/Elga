@@ -1,11 +1,13 @@
-settings = require('./settings.json');
+const fs = require('fs')
 Discord = require('discord.js');
 client = new Discord.Client();
-const fs = require('fs');
+settings = require('./settings.json');
 
-client.login(settings.token);
+console.log('Logging in...')
 
-client.on('ready', () => console.log('Logged in as ' + client.user.tag));
+client.login(settings.token)
+
+client.on('ready', () => console.log('Logged in as ' + client.user.tag))
 
 client.once('ready', async () => {
     require('./cmd/reboot.js').boot();
@@ -17,7 +19,7 @@ client.once('ready', async () => {
         if (err) console.error(err);
         console.log(`Loading a total of ${files.length} commands.`);
 
-        files.forEach(file => {
+         files.forEach(file => {
             let command = require(`./cmd/${file}`);
             console.log(`Loading Command: ${command.props.name}`);
             client.commands.set(command.props.name, command);
@@ -40,15 +42,13 @@ client.once('ready', async () => {
                 console.log('Failed to reload' + command)
             }
         }
-    })
-
+    });
 });
 
 client.on('message', (msg) => {
     if (msg.author.id !== client.user.id) return;
 
      Object.keys(settings.replaces).filter((word) => msg.content.toLowerCase().includes(word)).forEach((word) => {
-         if (msg.content.toLowerCase().includes(word)) 
              msg.edit(msg.content.replace(word, settings.replaces[word]));
      });
 
@@ -88,4 +88,4 @@ client.reload = function(command) {
             reject(e);
         }
     });
-};
+}

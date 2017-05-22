@@ -19,14 +19,14 @@ exports.run = function(client, msg, args) {
             fields: [
                 { 'name': 'Description: ', 'value': props.description, inline: false },
                 { 'name': 'Usage: ', 'value': props.usage.replace('{prefix}', settings.prefix), inline: false },
-                { 'name': 'Aliases: ', 'value': (props.aliases[0] ? props.aliases.join(', ') : 'None' ), inline: false }
+                { 'name': 'Aliases: ', 'value': (props.aliases[0] ? props.aliases.join(', ') : 'None'), inline: false }
             ]
         } });
 };
 
 exports.props = {
-aliases: [],
-name: 'help',
-description: 'Help command',
-usage: `{prefix}help\n{prefix}help <command name>`
+    aliases: [],
+    name: 'help',
+    description: 'Help command',
+    usage: `{prefix}help\n{prefix}help <command name>`
 };
