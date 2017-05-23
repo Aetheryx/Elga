@@ -1,4 +1,4 @@
-exports.run = async function(client, msg, args) {
+exports.run = async function(msg, args) {
     let command;
     if (client.commands.has(args[0])) {
         command = args[0];

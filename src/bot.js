@@ -48,9 +48,9 @@ client.once('ready', async () => {
 client.on('message', (msg) => {
     if (msg.author.id !== client.user.id) return;
 
-     Object.keys(settings.replaces).filter((word) => msg.content.toLowerCase().includes(word)).forEach((word) => {
-             msg.edit(msg.content.replace(word, settings.replaces[word]));
-     });
+    Object.keys(settings.replaces).filter((word) => msg.content.toLowerCase().includes(word)).forEach((word) => {
+        msg.edit(msg.content.replace(word, settings.replaces[word]));
+    });
 
     if (!msg.content.startsWith(settings.prefix)) return;
     const command = msg.content.split(' ')[0].slice(settings.prefix.length);
@@ -64,7 +64,7 @@ client.on('message', (msg) => {
 
     if (cmd) {
         const args = msg.content.split(' ').slice(1);
-        cmd.run(client, msg, args);
+        cmd.run(msg, args);
     }
 });
 
@@ -74,6 +74,7 @@ client.reload = function(command) {
             delete require.cache[require.resolve(`./cmd/${command}`)];
             let cmd = require(`./cmd/${command}`);
             client.commands.delete(command);
+
             client.aliases.forEach((cmd, alias) => {
                 if (cmd === command)
                     client.aliases.delete(alias);

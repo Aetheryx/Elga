@@ -1,4 +1,4 @@
-exports.run = function(client, msg) {
+exports.run = function(msg) {
     msg.edit({ embed: {
             color: settings.embedColor,
             title: ':ping_pong: Pong!',

@@ -2,9 +2,9 @@
   "name": "remindme",
   "version": "1.0.0",
   "description": "Aetheryx' selfbot for Discord.",
-  "main": "./src/elga.js",
+  "main": "./src/bot.js",
   "scripts": {
-    "start": "node ./src/elga.js",
+    "start": "node ./src/bot.js",
     "test": "eslint ./src/**/*.js"
   },
   "repository": {

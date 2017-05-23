@@ -1,4 +1,4 @@
-exports.run = function(client, msg, args) {
+exports.run = function(msg, args) {
   if (!args[0])
         return msg.edit({ embed: {
             title: `Commands (${client.commands.size})`,

@@ -2,7 +2,7 @@ const os = require('os');
 const moment = require('moment');
 require('moment-duration-format');
 
-exports.run = function(client, msg) {
+exports.run = function(msg) {
     let uptime;
     if (process.uptime() < 60) {
         let minutes = Math.floor((((process.uptime() % 31536000) % 86400) % 3600) / 60);
