@@ -1,25 +1,38 @@
 exports.run = async function (msg, args) {
-        let script = args.join(' ');
-        let silent = script.includes('--silent') ? true : false;
-        let asynchr = script.includes('--async') ? true : false;
+        let input = args.join(' ');
+        const silent = input.includes('--silent') ? true : false;
+        const asynchr = input.includes('--async') ? true : false;
         if (silent || asynchr) 
-            script = script.replace('--silent', '').replace('--async', '');
+            input = input.replace('--silent', '').replace('--async', '');
+
+        let result;
+        let err;
 
         try {
-            let code = (asynchr ? eval(`(async()=>{${script}})();`) : eval(script));
-            if (code instanceof Promise && asynchr) code = await code;
-            if (typeof code !== 'string')
-                code = require('util').inspect(code, { depth: 0 });
-            code = code.replace(new RegExp(client.token, 'gi'), 'fite me irl');
-            if (!silent) msg.edit(script + '\n```xl\n' + code + '\n```');
-        } catch (e) {
-            msg.edit(script + '\n`ERROR` ```xl\n' + e + '\n```');
+            result = (asynchr ? eval(`(async()=>{${input}})();`) : eval(input));
+            if (result instanceof Promise && asynchr) {
+                result = await result;
+                console.log('hiasdasd')
+            }
+
+            if (typeof result !== 'string')
+                result = require('util').inspect(result, { depth: 0 });
+
+            result = result.replace(new RegExp(client.token, 'gi'), 'fite me irl');
+        } catch (err) {
+            result = err.message;
+            err = true;
         };
+
+        if (!silent && !err) 
+            msg.edit(input + '\n```js\n' + result + '\n```');
+        else if (silent && !err) 
+            msg.delete();
 }
 
 exports.props = {
     aliases     : ['e', 'ev', 'debug'],
     name        : 'eval',
-    description : 'Evaluates scripts in Node.js.',
+    description : 'Evaluates scripts in Node.js. ',
     usage       : '{prefix}eval <script> [--async|--silent]'
 };
