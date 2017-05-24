@@ -2,15 +2,10 @@ const fs = require('fs');
 let rebootdb = require('../resources/.reboot.json')
 
 exports.run = async function(msg) {
-    /*msg.edit({ embed: {
-        color: settings.embedColor,
-        fields: [ { name: '\u200b', value: '**Rebooting...**' } ],
-        thumbnail: { url: 'http://i.imgur.com/mIvDcFy.gif' }
-    } });*/
 
     await msg.edit({ embed: {
         color: settings.embedColor,
-        author: { name: 'Rebooting...', icon_url: 'http://i.imgur.com/mIvDcFy.gif' }
+        author: { name: 'Rebooting...', icon_url: 'http://i.imgur.com/r9M1n1s.gif' }
     }})
 
     await fs.writeFileSync('./resources/.reboot.json', JSON.stringify({

@@ -1,21 +1,22 @@
-const fs = require('fs')
+const fs = require('fs');
+const path = require('path');
 Discord = require('discord.js');
 client = new Discord.Client();
-settings = require('./settings.json');
+settings = require(path.join(__dirname, 'settings.json'));
 
-console.log('Logging in...')
+console.log('Logging in...');
 
-client.login(settings.token)
+client.login(settings.token);
 
 client.on('ready', () => console.log('Logged in as ' + client.user.tag))
 
 client.once('ready', async () => {
-    require('./cmd/reboot.js').boot();
+    require(path.join(__dirname, 'cmd/reboot.js')).boot();
 
     client.commands = new Discord.Collection();
     client.aliases = new Discord.Collection();
 
-    fs.readdir('./cmd/', (err, files) => {
+    fs.readdir(path.join(__dirname, 'cmd'), (err, files) => {
         if (err) console.error(err);
         console.log(`Loading a total of ${files.length} commands.`);
 
@@ -27,12 +28,11 @@ client.once('ready', async () => {
             command.props.aliases.forEach(alias => {
                 client.aliases.set(alias, command.props.name);
             });
-
         });
     });
 
 
-    fs.watch('./cmd', (eventType, filename) => {
+/*    fs.watch('./cmd', (eventType, filename) => {
         if (eventType === 'change') {
             let command = filename.replace('.js', '')
             try {
@@ -42,7 +42,7 @@ client.once('ready', async () => {
                 console.log('Failed to reload' + command)
             }
         }
-    });
+    });*/
 });
 
 client.on('message', (msg) => {
@@ -89,4 +89,8 @@ client.reload = function(command) {
             reject(e);
         }
     });
+}
+
+function isValidCommand(cmd) {
+    
 }
