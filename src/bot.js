@@ -36,14 +36,14 @@ client.once('ready', async () => {
     });
 
 
-    fs.watch(path.join(__dirname, 'cmd'), (eventType, filename) => {
+    fs.watch(path.join(__dirname, 'cmd'), async (eventType, filename) => {
         if (eventType === 'change') {
             let command = filename.replace('.js', '');
             try {
-                client.reload(command);
+                await client.reload(command);
                 console.log('Reloaded ' + command);
-            } catch(e) {
-                console.log('Failed to reload ' + command);
+            } catch (e) {
+                console.log('Failed to reload ' + command + ',\n' + e);
             }
         }
     });
