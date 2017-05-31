@@ -1,20 +1,24 @@
 const fs = require('fs');
 const path = require('path');
-Discord = require('discord.js');
+const Discord = require('discord.js');
 client = new Discord.Client();
 settings = require(path.join(__dirname, 'settings.json'));
+//const levelup = require('level');
+//db = levelup('./testdb');
+//require('level-promise').install(db);
 
 console.log('Logging in...');
 
 client.login(settings.token);
 
-client.on('ready', () => console.log('Logged in as ' + client.user.tag))
+client.on('ready', () => console.log('Logged in as ' + client.user.tag));
 
 client.once('ready', async () => {
     require(path.join(__dirname, 'cmd/reboot.js')).boot();
 
     client.commands = new Discord.Collection();
     client.aliases = new Discord.Collection();
+    client.redditDB = new Array();
 
     fs.readdir(path.join(__dirname, 'cmd'), (err, files) => {
         if (err) console.error(err);
@@ -32,24 +36,24 @@ client.once('ready', async () => {
     });
 
 
-/*    fs.watch('./cmd', (eventType, filename) => {
+    fs.watch(path.join(__dirname, 'cmd'), (eventType, filename) => {
         if (eventType === 'change') {
-            let command = filename.replace('.js', '')
+            let command = filename.replace('.js', '');
             try {
-                client.reload(command)
-                console.log('Reloaded' + command)
+                client.reload(command);
+                console.log('Reloaded ' + command);
             } catch(e) {
-                console.log('Failed to reload' + command)
+                console.log('Failed to reload ' + command);
             }
         }
-    });*/
+    });
 });
 
 client.on('message', (msg) => {
     if (msg.author.id !== client.user.id) return;
 
     Object.keys(settings.replaces).filter((word) => msg.content.toLowerCase().includes(word)).forEach((word) => {
-        msg.edit(msg.content.replace(word, settings.replaces[word]));
+        msg.edit(msg.content.replace(word, settings.replaces[word])); // use regex for emojis
     });
 
     if (!msg.content.startsWith(settings.prefix)) return;
@@ -64,7 +68,9 @@ client.on('message', (msg) => {
 
     if (cmd) {
         const args = msg.content.split(' ').slice(1);
+        //let startTime = Date.now()
         cmd.run(msg, args);
+        //msg.channel.send("Execution time: " + (Date.now() - startTime) + " ms")
     }
 });
 
@@ -89,8 +95,4 @@ client.reload = function(command) {
             reject(e);
         }
     });
-}
-
-function isValidCommand(cmd) {
-    
-}
+};
