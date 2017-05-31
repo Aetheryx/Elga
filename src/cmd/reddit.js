@@ -7,24 +7,27 @@ exports.run = async function(msg, args) {
     if (args[1] && !['hour', 'day', 'today', 'week', 'month', 'year', 'all'].includes(args[1]))
         return msg.edit(`Argument error! \`${args[1]}\` is not one of \`hour | day | week | month | year | all\`.`);
 
-    const res = await snekfetch.get(`https://www.reddit.com/r/${args[0]}/top/.json?sort=top&t=${args[1] ? args[1] : 'all'}&limit=1`).set('X-Modhash', '5dvpp9pjvt0061a0909b8e0828df008a31d662a947ff0cd622');
+    const res = await snekfetch.get(`https://www.reddit.com/r/${args[0]}/top/.json?sort=top&t=${args[1] ? args[1] : 'all'}&limit=5`)
 
-    const children = res.body.data.children.filter((child) => child.data.selftext.length <= 2000);
-    const data = children[Math.floor(Math.random() * children.length)].data;
+    const post = res.body.data.children.filter((child) => child.data.selftext.length <= 2000 && !client.redditDB.includes(child.data.id))[0];
+    
+    if (!post)
+        return msg.edit('No new posts found!');
 
-    console.log(data);
+    client.redditDB.push(post.data.id);
 
     let imageURL;
-    if (data.preview)
-        imageURL = data.preview.images[0].source.url;
+
+    if (post.preview)
+        imageURL = post.preview.images[0].source.url;
 
     msg.edit({ embed: {
         color: settings.embedColor,
-        title: data.title,
-        url: data.url,
-        description: data.selftext,
+        title: post.data.title,
+        url: post.data.url,
+        description: post.data.selftext,
         image: { url: imageURL },
-        footer: { text: `${data.score} upvotes | ${data.num_comments} comments` }
+        footer: { text: `${post.data.score} upvotes | ${post.data.num_comments} comments` }
     } })
 
 };
