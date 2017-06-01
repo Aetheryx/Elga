@@ -23,7 +23,7 @@ exports.run = async function(msg, args) {
             stderr && msg.channel.send('Errors: \n\`\`\`' + stderr + '\`\`\`');
             if (!stderr && !stdout)
                 msg.react('\u2611');
-        };
+        }
     });
 };
 
