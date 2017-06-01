@@ -1,9 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-let rebootdb = require(path.join(__dirname, '../resources/.reboot.json'))
+let rebootdb = require(path.join(__dirname, '../resources/.reboot.json'));
 
-exports.run = async function(msg) {
-
+exports.run = async function (msg) {
     await msg.edit({ embed: {
         color: settings.embedColor,
         author: { name: 'Rebooting...', icon_url: 'http://i.imgur.com/r9M1n1s.gif' }
@@ -25,12 +24,12 @@ exports.boot = async function() {
         color: settings.embedColor,
         description: 'Rebooted.',
         footer: { text: `Rebooted in ${tStamp}.` }
-    } })
-}
+    } });
+};
 
 exports.props = {
-    aliases: ['restart'],
-    name: 'reboot',
-    description: 'Reboots the selfbot.',
-    usage: '{prefix}reboot'
+    name        : 'reboot',
+    usage       : '{command}',
+    aliases     : ['restart'],
+    description : 'Reboots the selfbot.'
 };

@@ -40,20 +40,15 @@ exports.run = async function(msg, args) {
             title: post.data.title,
             url: post.data.url,
             description: post.data.selftext,
-            image: {
-                url: imageURL
-            },
-            footer: {
-                text: `${post.data.score} upvotes | ${post.data.num_comments} comments`
-            }
+            image: { url: imageURL },
+            footer: { text: `${post.data.score} upvotes | ${post.data.num_comments} comments` }
         }
-    })
-
+    });
 };
 
 exports.props = {
     name: 'reddit',
-    usage: '{prefix}reddit <subreddit name> [hour | day | week | month | year | all]',
+    usage: '{command} <subreddit name> [hour | day | week | month | year | all]',
     aliases: ['rd'],
     description: 'Fetches posts from a specific subreddit. Defaults to all-time unless specified.'
 };

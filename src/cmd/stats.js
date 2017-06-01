@@ -31,7 +31,7 @@ exports.run = function(msg) {
 
 exports.props = {
     name        : 'stats',
-    usage       : '{prefix}stats',
+    usage       : '{command}',
     aliases     : ['info'],
     description : 'Returns statistics about the selfbot.'
 };

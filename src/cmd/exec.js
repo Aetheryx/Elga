@@ -28,8 +28,8 @@ exports.run = async function(msg, args) {
 };
 
 exports.props = {
-    aliases: ['bash'],
-    name: 'exec',
-    description: 'Allows you to execute terminal commands.',
-    usage: '{prefix}exec <command(s)>'
+    name        : 'exec',
+    usage       : '{command} <command>',
+    aliases     : ['bash', 'run'],
+    description : 'Allows you to execute terminal commands.'
 };

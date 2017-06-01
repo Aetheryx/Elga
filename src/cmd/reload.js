@@ -6,7 +6,7 @@ exports.run = async function(msg, args) {
         command = client.aliases.get(args[0]);
     }
     if (!command) {
-        return msg.edit(`I cannot find the command \`${args[0]}\`.`);
+        return msg.edit(`Command \`${args[0]}\` not found.`);
     } else {
         let m = await msg.edit(`Reloading: ${command}`);
         try {
@@ -14,13 +14,13 @@ exports.run = async function(msg, args) {
             await m.edit(`Successfully reloaded: \`${command}\``);
         } catch (e) {
             m.edit(`Command reload failed: ${command}\n\`\`\`${e.stack}\`\`\``);
-        };
-    };
+        }
+    }
 };
 
 exports.props = {
-    aliases: ['rl'],
-    name: "reload",
-    description: "Reloads a command.",
-    usage: `${settings.prefix}reload <arg>`
+    name        : 'reload',
+    usage       : '{command} <command to reload>',
+    aliases     : ['rl'],
+    description : 'Reloads a command.'
 };

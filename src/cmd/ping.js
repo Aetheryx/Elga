@@ -6,11 +6,9 @@ exports.run = function(msg) {
         } });
 };
 
-
-
 exports.props = {
-    aliases: [],
-    name: 'ping',
-    description: 'Returns the latency to the Discord API server.',
-    usage: '{prefix}ping'
+    name        : 'ping',
+    usage       : '{command}',
+    aliases     : [],
+    description : 'Returns the latency to the Discord API server.'
 };

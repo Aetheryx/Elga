@@ -6,9 +6,9 @@ exports.run = async function (msg, args) {
     messages.forEach(message => message.delete());
 };
 
-exports.props = {   
-    aliases     : ['delete', 'd'],
+exports.props = {
     name        : 'del',
-    description : 'Deletes a specified amount of your messages in the channel you send it from.',
-    usage       : '{prefix}del <amount of messages you want to delete>'
+    usage       : '{command} <amount of messages you want to delete>',
+    aliases     : ['delete', 'd'],
+    description : 'Deletes a specified amount of your own messages in the channel you send it from. See the `purge` command for deleting other users\' messages.'
 };
