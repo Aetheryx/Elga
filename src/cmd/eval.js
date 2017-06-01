@@ -1,4 +1,4 @@
-exports.run = async function(msg, args) {
+exports.run = async function (msg, args) {
     let input = args.join(' ');
     const silent = input.includes('--silent') ? true : false;
     const asynchr = input.includes('--async') ? true : false;
@@ -8,10 +8,9 @@ exports.run = async function(msg, args) {
     let result;
 
     try {
-        result = (asynchr ? eval(`(async()=>{${input}})();`) : eval(input));
-        if (result instanceof Promise && asynchr) {
+        result = asynchr ? eval(`(async()=>{${input}})();`) : eval(input);
+        if (result instanceof Promise && asynchr) 
             result = await result;
-        }
         if (typeof result !== 'string')
             result = require('util').inspect(result, { depth: 0 });
         result = result.replace(new RegExp(client.token, 'gi'), 'fite me irl');
@@ -20,7 +19,7 @@ exports.run = async function(msg, args) {
     }
 
     if (!silent)
-        msg.edit(input + '\n```js\n' + result + '\n```');
+        msg.edit(`${input}\n\`\`\`js\n${result}\n\`\`\``);
     else
         msg.delete();
 };

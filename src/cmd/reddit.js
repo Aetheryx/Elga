@@ -1,6 +1,6 @@
 const snekfetch = require('snekfetch');
 
-exports.run = async function(msg, args) {
+exports.run = async function (msg, args) {
     if (!args[0])
         return msg.edit('Missing required args.');
 
@@ -13,7 +13,7 @@ exports.run = async function(msg, args) {
     const res = await snekfetch.get(`https://www.reddit.com/r/${args[0]}/top/.json?sort=top&t=${args[1] ? args[1] : 'all'}&limit=8`)
         .catch(err => {
             if (err)
-                return msg.edit('Something went wrong. \n`' + err.message + '`');
+                return msg.edit(`Something went wrong. \n\`${err.message}\``);
         });
 
     if (!res.request.path.startsWith('/r/'))

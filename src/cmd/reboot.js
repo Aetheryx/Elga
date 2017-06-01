@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-let rebootdb = require(path.join(__dirname, '../resources/.reboot.json'));
+const rebootdb = require(path.join(__dirname, '../resources/.reboot.json'));
 
 exports.run = async function (msg) {
     await msg.edit({ embed: {
@@ -16,10 +16,10 @@ exports.run = async function (msg) {
     process.exit();
 };
 
-exports.boot = async function() {
-    let m = await client.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).catch(e => console.log(e));
+exports.boot = async function () {
+    const m = await client.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).catch(e => console.log(e));
     if (!m) return;
-    let tStamp = Date.now() - rebootdb.startTime > 1000 ? (Date.now() - rebootdb.startTime) / 1000 + 's' : Date.now() - rebootdb.startTime + 'ms';
+    const tStamp = Date.now() - rebootdb.startTime > 1000 ? `${(Date.now() - rebootdb.startTime) / 1000}s` : `${Date.now() - rebootdb.startTime}ms`;
     m.edit({ embed: {
         color: settings.embedColor,
         description: 'Rebooted.',

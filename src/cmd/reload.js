@@ -1,14 +1,14 @@
-exports.run = async function(msg, args) {
+exports.run = async function (msg, args) {
     let command;
-    if (client.commands.has(args[0])) {
+    if (client.commands.has(args[0])) 
         command = args[0];
-    } else if (client.aliases.has(args[0])) {
+    else if (client.aliases.has(args[0])) 
         command = client.aliases.get(args[0]);
-    }
+
     if (!command) {
         return msg.edit(`Command \`${args[0]}\` not found.`);
     } else {
-        let m = await msg.edit(`Reloading: ${command}`);
+        const m = await msg.edit(`Reloading: ${command}`);
         try {
             await client.reload(command);
             await m.edit(`Successfully reloaded: \`${command}\``);
