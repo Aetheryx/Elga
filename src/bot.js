@@ -11,7 +11,7 @@ console.log('Logging in...');
 
 client.login(settings.token);
 
-client.on('ready', () => console.log('Logged in as ' + client.user.tag));
+client.on('ready', () => console.log(`Logged in as ${client.user.tag}.`));
 
 client.once('ready', async () => {
     require(path.join(__dirname, 'cmd/reboot.js')).boot();
@@ -25,7 +25,7 @@ client.once('ready', async () => {
         console.log(`Loading a total of ${files.length} commands.`);
 
          files.forEach(file => {
-            let command = require(`./cmd/${file}`);
+            const command = require(`./cmd/${file}`);
             console.log(`Loading Command: ${command.props.name}`);
             client.commands.set(command.props.name, command);
 
@@ -38,12 +38,12 @@ client.once('ready', async () => {
 
     fs.watch(path.join(__dirname, 'cmd'), async (eventType, filename) => {
         if (eventType === 'change') {
-            let command = filename.replace('.js', '');
+            const command = filename.replace('.js', '');
             try {
                 await client.reload(command);
-                console.log('Reloaded ' + command);
+                console.log(`Reloaded ${command}.`);
             } catch (e) {
-                console.log('Failed to reload ' + command + ',\n' + e);
+                console.log(`Failed to reload ${command},\n${e}`);
             }
         }
     });
@@ -52,8 +52,11 @@ client.once('ready', async () => {
 client.on('message', (msg) => {
     if (msg.author.id !== client.user.id) return;
 
-    Object.keys(settings.replaces).filter((word) => msg.content.toLowerCase().includes(word)).forEach((word) => {
-        msg.edit(msg.content.replace(word, settings.replaces[word])); // use regex for emojis
+    const regex = /<:[a-z]*shrug[a-z]*:[0-9]*>/g;
+
+    Object.keys(settings.replaces).filter(word => msg.content.toLowerCase().includes(word)).forEach(word => {
+        if (!regex.test(msg.content)) 
+            msg.edit(msg.content.replace(word, settings.replaces[word])); 
     });
 
     if (!msg.content.startsWith(settings.prefix)) return;
@@ -74,11 +77,11 @@ client.on('message', (msg) => {
     }
 });
 
-client.reload = function(command) {
+client.reload = function (command) {
     return new Promise((resolve, reject) => {
         try {
             delete require.cache[require.resolve(`./cmd/${command}`)];
-            let cmd = require(`./cmd/${command}`);
+            const cmd = require(`./cmd/${command}`);
             client.commands.delete(command);
 
             client.aliases.forEach((cmd, alias) => {
