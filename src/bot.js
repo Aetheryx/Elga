@@ -18,7 +18,7 @@ client.once('ready', async () => {
 
     client.commands = new Discord.Collection();
     client.aliases = new Discord.Collection();
-    client.redditDB = new Array();
+    client.redditdb = new Array();
 
     fs.readdir(path.join(__dirname, 'cmd'), (err, files) => {
         if (err) console.error(err);
@@ -72,8 +72,16 @@ client.on('message', (msg) => {
     if (cmd) {
         const args = msg.content.split(' ').slice(1);
         //let startTime = Date.now()
+    try {
         cmd.run(msg, args);
+    } catch (err) {
+        msg.edit({ embed: {
+            title: ':warning: Something went wrong.',
+            description: '```\n' + err.stack + '\n```' // eslint-disable-line prefer-template
+        }})
+    
         //msg.channel.send("Execution time: " + (Date.now() - startTime) + " ms")
+    }
     }
 });
 
