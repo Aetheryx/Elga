@@ -20,9 +20,9 @@ exports.run = async function (msg, args) {
         return msg.edit(`Subreddit \`${args[0]}\` not found.`);
 
     const post = res.body.data.children
-        .filter((child) => child.data.selftext.length <= 2000)
-        .filter((child) => child.data.title.length <= 256)
-        .filter((child) => !client.redditDB.includes(child.data.id))[0];
+        .filter(child => child.data.selftext.length <= 2000)
+        .filter(child => child.data.title.length <= 256)
+        .filter(child => !client.redditDB.includes(child.data.id))[0];
 
     if (!post)
         return msg.edit('No new posts found!');

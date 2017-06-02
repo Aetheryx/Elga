@@ -11,7 +11,7 @@ exports.run = async function (msg, args) {
         if (stdout.length > 2000 || stderr.length > 2000) {
             const res = await snekfetch.post('https://hastebin.com/documents')
                 .send(`${stdout}\n\n${stderr}`)
-                .catch((e) => msg.channel.send(e.message));
+                .catch(err => msg.channel.send(err.message));
 
                 msg.channel.send({ embed: {
                     color: settings.embedColor,
