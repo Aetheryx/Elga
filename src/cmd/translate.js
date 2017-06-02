@@ -1,8 +1,8 @@
 const translate = require('google-translate-api');
 
 exports.run = async function (msg, args) {
-    if (!args[0] || !args[1])
-        return msg.edit('Missing required argument(s).');
+    if (!args[2])
+        return msg.edit('Missing required arguments.');
     const res = await translate(args.slice(2).join(' '), { from: args[0], to: args[1] });
     msg.channel.send({ embed: {
         color: settings.embedColor,
