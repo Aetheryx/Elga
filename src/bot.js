@@ -1,8 +1,7 @@
 const fs = require('fs');
-const path = require('path');
 const Discord = require('discord.js');
 client = new Discord.Client();
-settings = require(path.join(__dirname, 'settings.json'));
+settings = require(`${__dirname}/settings.json`);
 //const levelup = require('level');
 //db = levelup('./testdb');
 //require('level-promise').install(db);
@@ -14,13 +13,13 @@ client.login(settings.token);
 client.on('ready', () => console.log(`Logged in as ${client.user.tag}.`));
 
 client.once('ready', async () => {
-    require(path.join(__dirname, 'cmd/reboot.js')).boot();
+    require(`${__dirname}/cmd/reboot.js`).boot();
 
     client.commands = new Discord.Collection();
     client.aliases = new Discord.Collection();
     client.redditdb = new Array();
 
-    fs.readdir(path.join(__dirname, 'cmd'), (err, files) => {
+    fs.readdir(`${__dirname}/cmd/`, (err, files) => {
         if (err) console.error(err);
         console.log(`Loading a total of ${files.length} commands.`);
 
@@ -36,7 +35,7 @@ client.once('ready', async () => {
     });
 
 
-    fs.watch(path.join(__dirname, 'cmd'), async (eventType, filename) => {
+    fs.watch(`${__dirname}/cmd/`, async (eventType, filename) => {
         if (eventType === 'change') {
             const command = filename.replace('.js', '');
             try {
@@ -78,7 +77,7 @@ client.on('message', (msg) => {
         msg.edit({ embed: {
             title: ':warning: Something went wrong.',
             description: '```\n' + err.stack + '\n```' // eslint-disable-line prefer-template
-        }})
+        }});
         //msg.channel.send("Execution time: " + (Date.now() - startTime) + " ms")
     }
     }

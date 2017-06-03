@@ -1,6 +1,5 @@
 const fs = require('fs');
-const path = require('path');
-const rebootdb = require(path.join(__dirname, '../resources/.reboot.json'));
+const rebootdb = require(`${__dirname}/../resources/.reboot.json`);
 
 exports.run = async function (msg) {
     await msg.edit({ embed: {
@@ -8,7 +7,7 @@ exports.run = async function (msg) {
         author: { name: 'Rebooting...', icon_url: 'http://i.imgur.com/r9M1n1s.gif' }
     }});
 
-    await fs.writeFileSync(path.join(__dirname, '../resources/.reboot.json'), JSON.stringify({
+    await fs.writeFileSync(`${__dirname}/../resources/.reboot.json`, JSON.stringify({
         'channelID': msg.channel.id,
         'messageID': msg.id,
         'startTime': Date.now()
