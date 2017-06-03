@@ -79,7 +79,6 @@ client.on('message', (msg) => {
             title: ':warning: Something went wrong.',
             description: '```\n' + err.stack + '\n```' // eslint-disable-line prefer-template
         }})
-    
         //msg.channel.send("Execution time: " + (Date.now() - startTime) + " ms")
     }
     }

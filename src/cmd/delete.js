@@ -3,7 +3,7 @@ exports.run = async function (msg, args) {
     let messages = await msg.channel.fetchMessages({ limit: 100 });
     messages = messages.array().filter(message => message.author.id === client.user.id);
     messages.length = arg + 1;
-    messages.forEach(message => message.delete());
+    messages.forEach(message => message.delete())
 };
 
 exports.props = {

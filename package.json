@@ -5,7 +5,7 @@
   "main": "./src/bot.js",
   "scripts": {
     "start": "node ./src/bot.js",
-    "test": "eslint ./src/**/*.js"
+    "test": "eslint ./**/*.js"
   },
   "repository": {
     "type": "git",
