@@ -20,7 +20,8 @@
         "space-before-blocks": ["error", "always"],
         "prefer-arrow-callback": "error",
         "prefer-const": "error",
-        "prefer-template": "error"
+        "prefer-template": "error",
+        "indent": ["error", 4]
     },
     "globals": {
         "client": true,

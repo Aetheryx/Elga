@@ -16,14 +16,14 @@ client.once('ready', async () => {
     require(`${__dirname}/cmd/reboot.js`).boot();
 
     client.commands = new Discord.Collection();
-    client.aliases = new Discord.Collection();
+    client.aliases  = new Discord.Collection();
     client.redditdb = new Array();
 
     fs.readdir(`${__dirname}/cmd/`, (err, files) => {
         if (err) console.error(err);
         console.log(`Loading a total of ${files.length} commands.`);
 
-         files.forEach(file => {
+        files.forEach(file => {
             const command = require(`./cmd/${file}`);
             console.log(`Loading Command: ${command.props.name}`);
             client.commands.set(command.props.name, command);
@@ -71,15 +71,15 @@ client.on('message', (msg) => {
     if (cmd) {
         const args = msg.content.split(' ').slice(1);
         //let startTime = Date.now()
-    try {
-        cmd.run(msg, args);
-    } catch (err) {
-        msg.edit({ embed: {
-            title: ':warning: Something went wrong.',
-            description: '```\n' + err.stack + '\n```' // eslint-disable-line prefer-template
-        }});
+        try {
+            cmd.run(msg, args);
+        } catch (err) {
+            msg.edit({ embed: {
+                title: ':warning: Something went wrong.',
+                description: '```\n' + err.stack + '\n```' // eslint-disable-line prefer-template
+            }});
         //msg.channel.send("Execution time: " + (Date.now() - startTime) + " ms")
-    }
+        }
     }
 });
 

@@ -13,11 +13,10 @@ exports.run = async function (msg, args) {
                 .send(`${stdout}\n\n${stderr}`)
                 .catch(err => msg.channel.send(err.message));
 
-                msg.channel.send({ embed: {
-                    color: settings.embedColor,
-                    description: `Console log exceeds 2000 characters. View [here](https://hastebin.com/${res.body.key}).`
-                } });
-
+            msg.channel.send({ embed: {
+                color: settings.embedColor,
+                description: `Console log exceeds 2000 characters. View [here](https://hastebin.com/${res.body.key}).`
+            } });
         } else {
             stdout && msg.channel.send('Info: \n\`\`\`' + stdout + '\`\`\`'); // eslint-disable-line prefer-template
             stderr && msg.channel.send('Errors: \n\`\`\`' + stderr + '\`\`\`'); // eslint-disable-line prefer-template

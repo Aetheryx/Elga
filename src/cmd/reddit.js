@@ -62,8 +62,8 @@ exports.run = async function (msg, args) {
             .filter(child => child.data.selftext.length <= 2000)
             .filter(child => child.data.title.length <= 256)
             .filter(child => !client.redditdb.includes(child.data.id))[0];
-            if (!post)
-                return msg.edit(`No new posts found. Try specifying a time filter or clearing the 'Read posts' list with \`${settings.prefix}reddit reset\`.`);
+        if (!post)
+            return msg.edit(`No new posts found. Try specifying a time filter or clearing the 'Read posts' list with \`${settings.prefix}reddit reset\`.`);
 
         client.redditdb.push(post.data.id);
 
