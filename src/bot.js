@@ -1,16 +1,35 @@
 const fs = require('fs');
 const Discord = require('discord.js');
+const watcher = require('chokidar');
 client = new Discord.Client();
 settings = require(`${__dirname}/settings.json`);
-//const levelup = require('level');
-//db = levelup('./testdb');
-//require('level-promise').install(db);
+/* Completed commands:
+
+ * delete
+ * ping
+ * stats
+ * emoji
+ * translate
+ * reload
+ * help
+ 
+ * WIP:
+ * eval
+ * exec
+ * fml
+ * reboot (gif, specifically)
+ * reddit
+ * tags (NAV, WHERE'S THE FUCKING LEVEL REWRITE)
+*/
 
 console.log('Logging in...');
 
 client.login(settings.token);
 
-client.on('ready', () => console.log(`Logged in as ${client.user.tag}.`));
+client.on('ready', () => {
+    console.log(`Logged in as ${client.user.tag}.`);
+    client.user.setStatus('invisible');
+});
 
 client.once('ready', async () => {
     require(`${__dirname}/cmd/reboot.js`).boot();
@@ -20,7 +39,8 @@ client.once('ready', async () => {
     client.redditdb = new Array();
 
     fs.readdir(`${__dirname}/cmd/`, (err, files) => {
-        if (err) console.error(err);
+        if (err) 
+            return console.error(err);
         console.log(`Loading a total of ${files.length} commands.`);
 
         files.forEach(file => {
@@ -28,22 +48,17 @@ client.once('ready', async () => {
             console.log(`Loading Command: ${command.props.name}`);
             client.commands.set(command.props.name, command);
 
-            command.props.aliases.forEach(alias => {
-                client.aliases.set(alias, command.props.name);
-            });
+            command.props.aliases.forEach(alias => client.aliases.set(alias, command.props.name));
         });
     });
 
-
-    fs.watch(`${__dirname}/cmd/`, async (eventType, filename) => {
-        if (eventType === 'change') {
-            const command = filename.replace('.js', '');
-            try {
-                await client.reload(command);
-                console.log(`Reloaded ${command}.`);
-            } catch (e) {
-                console.log(`Failed to reload ${command},\n${e}`);
-            }
+    watcher.watch(`${__dirname}/cmd/`).on('change', async path => {
+        const command = /cmd\\(.*).js/.exec(path)[1];
+        try {
+            await client.reload(command);
+            console.log(`Reloaded ${command}.`);
+        } catch (e) {
+            console.log(`Failed to reload ${command},\n${e}`);
         }
     });
 });
@@ -51,10 +66,10 @@ client.once('ready', async () => {
 client.on('message', (msg) => {
     if (msg.author.id !== client.user.id) return;
 
-    const regex = /<:[a-z]*shrug[a-z]*:[0-9]*>/g;
+    const emojiRegex = /<:[a-z]*shrug[a-z]*:[0-9]*>/g;
 
     Object.keys(settings.replaces).filter(word => msg.content.toLowerCase().includes(word)).forEach(word => {
-        if (!regex.test(msg.content)) 
+        if (!emojiRegex.test(msg.content)) 
             msg.edit(msg.content.replace(word, settings.replaces[word])); 
     });
 
@@ -62,7 +77,6 @@ client.on('message', (msg) => {
     const command = msg.content.split(' ')[0].slice(settings.prefix.length);
 
     let cmd;
-
     if (client.commands.has(command))
         cmd = client.commands.get(command);
     else if (client.aliases.has(command))
