@@ -1,8 +1,7 @@
 exports.run = async function (msg, args) {
-    const arg = parseInt(args[0]) ? parseInt(args[0]) : 1;
     let messages = await msg.channel.fetchMessages({ limit: 100 });
     messages = messages.array().filter(message => message.author.id === client.user.id);
-    messages.length = arg + 1;
+    messages.length = parseInt(args[0]) ? parseInt(args[0]) : 2;
     messages.forEach(message => message.delete());
 };
 
