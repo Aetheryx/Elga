@@ -1,6 +1,5 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const watcher = require('chokidar');
 client = new Discord.Client();
 settings = require(`${__dirname}/settings.json`);
 /* Completed commands:
@@ -14,12 +13,10 @@ settings = require(`${__dirname}/settings.json`);
  * help
  
  * WIP:
- * eval
- * exec
  * fml
  * reboot (gif, specifically)
  * reddit
- * tags (NAV, WHERE'S THE FUCKING LEVEL REWRITE)
+ * tags (nav :v)
 */
 
 console.log('Logging in...');
@@ -37,6 +34,7 @@ client.once('ready', async () => {
     client.commands = new Discord.Collection();
     client.aliases  = new Discord.Collection();
     client.redditdb = new Array();
+    client.fmlCache = new Array();
 
     fs.readdir(`${__dirname}/cmd/`, (err, files) => {
         if (err) 
@@ -52,8 +50,8 @@ client.once('ready', async () => {
         });
     });
 
-    watcher.watch(`${__dirname}/cmd/`).on('change', async path => {
-        const command = /cmd\\(.*).js/.exec(path)[1];
+    require('chokidar').watch(`${__dirname}/cmd/`).on('change', async (path) => {
+        const command = require('path').posix.basename(path).slice(0, -3);
         try {
             await client.reload(command);
             console.log(`Reloaded ${command}.`);
