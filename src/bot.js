@@ -1,7 +1,3 @@
-const fs = require('fs');
-const Discord = require('discord.js');
-client = new Discord.Client();
-settings = require(`${__dirname}/settings.json`);
 /* Completed commands:
 
  * delete
@@ -11,13 +7,25 @@ settings = require(`${__dirname}/settings.json`);
  * translate
  * reload
  * help
- 
+
  * WIP:
  * fml
  * reboot (gif, specifically)
  * reddit
- * tags (nav :v)
+ * tags (~~Fuck level. Mongo? SQL?~~ Yes, SQL.)
+
+ * Targets:
+ * AFK settings
+ * ~~Command prediction based on percentage of matched characters~~ meh
+ * Playing status
+ *
 */
+const fs = require('fs');
+const Discord = require('discord.js');
+client = new Discord.Client();
+settings = require(`${__dirname}/settings.json`);
+const sqlite = require('sqlite');
+const db = (async () => { const db = await sqlite.open('elgadb'); return db; })(); // god plz forgib me
 
 console.log('Logging in...');
 
@@ -25,8 +33,8 @@ client.login(settings.token);
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}.`);
-    client.user.setStatus('invisible');
 });
+
 
 client.once('ready', async () => {
     require(`${__dirname}/cmd/reboot.js`).boot();
@@ -34,7 +42,9 @@ client.once('ready', async () => {
     client.commands = new Discord.Collection();
     client.aliases  = new Discord.Collection();
     client.redditdb = new Array();
-    client.fmlCache = new Array();
+    client.missingArgsError = (msg, props) => {
+        msg.edit(`Missing required argument(s). Send \`${settings.prefix}help ${props.name}\` to view the syntax of this command.`);
+    }
 
     fs.readdir(`${__dirname}/cmd/`, (err, files) => {
         if (err) 
@@ -51,7 +61,7 @@ client.once('ready', async () => {
     });
 
     require('chokidar').watch(`${__dirname}/cmd/`).on('change', async (path) => {
-        const command = require('path').posix.basename(path).slice(0, -3);
+        const command = require('path').basename(path).slice(0, -3);
         try {
             await client.reload(command);
             console.log(`Reloaded ${command}.`);
@@ -61,7 +71,8 @@ client.once('ready', async () => {
     });
 });
 
-client.on('message', (msg) => {
+client.on('message', async (msg) => {
+    console.log(db);
     if (msg.author.id !== client.user.id) return;
 
     const emojiRegex = /<:[a-z]*shrug[a-z]*:[0-9]*>/g;
@@ -72,25 +83,25 @@ client.on('message', (msg) => {
     });
 
     if (!msg.content.startsWith(settings.prefix)) return;
-    const command = msg.content.split(' ')[0].slice(settings.prefix.length);
-
+    let command = msg.content.split(' ')[0].slice(settings.prefix.length);
     let cmd;
     if (client.commands.has(command))
         cmd = client.commands.get(command);
     else if (client.aliases.has(command))
         cmd = client.commands.get(client.aliases.get(command));
 
+
     if (cmd) {
         const args = msg.content.split(' ').slice(1);
-        //let startTime = Date.now()
+        // let startTime = Date.now()
         try {
-            cmd.run(msg, args);
+            cmd.run(msg, args, db);
         } catch (err) {
             msg.edit({ embed: {
                 title: ':warning: Something went wrong.',
                 description: '```\n' + err.stack + '\n```' // eslint-disable-line prefer-template
             }});
-        //msg.channel.send("Execution time: " + (Date.now() - startTime) + " ms")
+        // msg.channel.send("Execution time: " + (Date.now() - startTime) + " ms")
         }
     }
 });
