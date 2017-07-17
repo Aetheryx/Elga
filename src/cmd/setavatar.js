@@ -1,7 +1,8 @@
 exports.run = async function (msg, args) {
-    if (!args[0])
+    if (!args[0]) {
         return msg.edit('Missing required arguments.');
-    client.user.setAvatar(args.join(' '))
+    }
+    Elga.client.user.setAvatar(args.join(' '))
         .then(() => msg.edit('Avatar changed.'))
         .catch(err => msg.edit(`Something went wrong.\n${err.message}`));
 };

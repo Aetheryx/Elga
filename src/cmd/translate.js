@@ -1,4 +1,5 @@
-const translate = require('google-translate-api');
+/* eslint-disable */
+//const translate = require('google-translate-api');
 
 exports.run = async function (msg, args) {
     if (!args[2])

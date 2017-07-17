@@ -1,6 +1,7 @@
 exports.run = function (msg, args) {
-    if (!args[0])
+    if (!args[0]) {
         return msg.edit('No arguments passed.');
+    }
 
     const specialCodes = {
         '0': ':zero: ',
@@ -16,14 +17,17 @@ exports.run = function (msg, args) {
         '#': ':hash: ',
         '*': ':asterisk: ',
         '?': ':grey_question: ',
-        '!': ':grey_exclamation: '
+        '!': ':grey_exclamation: ',
+        ' ': '   '
     };
-    
+
     const newContent = args.join(' ').toLowerCase().split('').map(letter => {
-        if (/[a-z]/g.test(letter)) 
+        if (/[a-z]/g.test(letter)) {
             return `:regional_indicator_${letter}: `;
-        else if (specialCodes[letter])
+        }
+        else if (specialCodes[letter]) {
             return specialCodes[letter];
+        }
         return letter;
     }).join('');
 

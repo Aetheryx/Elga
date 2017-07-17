@@ -1,14 +1,15 @@
 exports.run = async function (msg, args) {
-    if (args.join(' ').length > 128)
+    if (args.join(' ').length > 128) {
         return msg.edit({ embed: {
-            color: settings.embedColor,
-            description: 'You can\'t set your nickname to something that long.'
+            color: Elga.settings.embedColor,
+            description: 'You can\'t set your game to something that long.'
         } });
-    await client.user.setGame(args.join(' '));
+    }
+    await Elga.client.user.setGame(args.join(' '));
     msg.edit({ embed: {
-        color: settings.embedColor,
-        description: args[0] ? `Playing status set to ${client.user.presence.game.name}.` : 'Playing status cleared.'
-    }});
+        color: Elga.settings.embedColor,
+        description: args[0] ? `Playing status set to ${Elga.client.user.presence.game.name}.` : 'Playing status cleared.'
+    } });
 };
 
 exports.props = {

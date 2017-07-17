@@ -3,8 +3,8 @@ const rebootdb = require(`${__dirname}/../resources/.reboot.json`);
 
 exports.run = async function (msg) {
     await msg.edit({ embed: {
-        color: settings.embedColor,
-        author: { name: 'Rebooting...', icon_url: 'http://i.imgur.com/r9M1n1s.gif' }
+        color: Elga.settings.embedColor,
+        author: { name: 'Rebooting...', icon_url: 'https://i.redd.it/ski3yupjvy4z.gif' }
     }});
 
     await fs.writeFileSync(`${__dirname}/../resources/.reboot.json`, JSON.stringify({
@@ -16,14 +16,17 @@ exports.run = async function (msg) {
 };
 
 exports.boot = async function () {
-    const m = await client.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).catch(e => console.log(e));
-    if (!m) return;
-    const tStamp = Date.now() - rebootdb.startTime > 1000 ? `${(Date.now() - rebootdb.startTime) / 1000}s` : `${Date.now() - rebootdb.startTime}ms`;
-    m.edit({ embed: {
-        color: settings.embedColor,
-        description: 'Rebooted.',
-        footer: { text: `Rebooted in ${tStamp}.` }
-    } });
+    if (!Elga.client.channels.get(rebootdb.channelID)) {
+        return;
+    }
+    Elga.client.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).then(m => {
+        const tStamp = Date.now() - rebootdb.startTime > 1000 ? `${(Date.now() - rebootdb.startTime) / 1000}s` : `${Date.now() - rebootdb.startTime}ms`;
+        m.edit({ embed: {
+            color: Elga.settings.embedColor,
+            description: 'Rebooted.',
+            footer: { text: `Rebooted in ${tStamp}.` }
+        } });
+    }).catch(() => {});
 };
 
 exports.props = {

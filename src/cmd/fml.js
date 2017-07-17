@@ -1,5 +1,5 @@
 /* eslint-disable */
-const fml = require('random_fml');
+
 exports.run = async function (msg) {
     const post = await fml();
     msg.edit({ embed: {

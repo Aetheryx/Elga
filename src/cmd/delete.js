@@ -1,7 +1,7 @@
 exports.run = async function (msg, args) {
     let messages = await msg.channel.fetchMessages({ limit: 100 });
-    messages = messages.array().filter(message => message.author.id === client.user.id);
-    messages.length = parseInt(args[0]) ? parseInt(args[0]) : 2;
+    messages = messages.filterArray(message => message.author.id === Elga.client.user.id);
+    messages.length = parseInt(args[0]) ? parseInt(args[0]) + 1 : 2;
     messages.forEach(message => message.delete());
 };
 
