@@ -36,7 +36,7 @@ exports.run = function (msg, args) {
 
 exports.props = {
     name        : 'emoji',
-    usage       : '{command} <text to turn into emojis>',
+    usage       : '{command} <text>',
     aliases     : ['emojify'],
     description : 'Turns text into emojis.'
 };

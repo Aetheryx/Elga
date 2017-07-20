@@ -1,7 +1,9 @@
+const util = require('util');
+
 exports.run = async function (msg, args) {
     let input = args.join(' ');
-    const silent = input.includes('--silent') ? true : false;
-    const asynchr = input.includes('--async') ? true : false;
+    const silent = input.includes('--silent');
+    const asynchr = input.includes('--async');
     if (silent || asynchr) {
         input = input.replace('--silent', '').replace('--async', '');
     }
@@ -9,22 +11,22 @@ exports.run = async function (msg, args) {
     let result;
 
     try {
-        result = asynchr ? eval(`(async()=>{${input}})();`) : eval(input);
+        result = asynchr ? eval(`(async()=>{return ${input}})();`) : eval(input);
         if (result instanceof Promise && asynchr) {
             result = await result;
         }
         if (typeof result !== 'string') {
-            result = require('util').inspect(result, { depth: 0 });
+            result = util.inspect(result, { depth: 0 });
         }
-        result = result.replace(new RegExp(Elga.client.token, 'gi'), 'fite me irl');
+        const tokenRegex = new RegExp(Elga.client.token, 'gi');
+        result = result.replace(tokenRegex, '[TOKEN]');
     } catch (err) {
         result = err.message;
     }
 
     if (!silent) {
         msg.edit(`${input}\n\`\`\`js\n${result}\n\`\`\``);
-    }
-    else {
+    } else {
         msg.delete();
     }
 };
