@@ -2,32 +2,34 @@ const { Client, Collection } = require('discord.js');
 const db = require('sqlite');
 db.open(`${__dirname}/elgadb.sqlite`);
 const fs = require('fs');
+const ElgaLogger = require(`${__dirname}/util/logger.js`);
 
 class ElgaClass {
-    constructor () {
+    constructor (config) {
         this.client = new Client();
         this.db = db;
-        this.settings = require(`${__dirname}/settings.json`);
+        this.config = config;
         this.commands = new Collection();
         this.aliases  = new Collection();
         this.log = new ElgaLogger();
         this.commandCache = { reddit: [], fml: [] };
-        this.client.login(this.settings.token);
-        console.log('Logging in..');
+        this.client.login(config.token);
+        this.log.info('Logging in..');
         this.client.on('ready', this.onReady.bind(this));
         this.client.once('ready', this.onceReady.bind(this));
         this.client.on('message', this.onMessage.bind(this));
     }
 
     onReady () {
-        console.log(`Logged in as ${this.client.user.tag}.`);
+        this.log.info(`Logged in as ${this.client.user.tag}.`);
+        delete this.client.user.email;
     }
 
     async onceReady () {
         require(`${__dirname}/cmd/reboot.js`).boot();
         this.loadCommands();
         this.initTables();
-        if (this.settings.autoReload) {
+        if (this.config.autoReload) {
             this.initAutoReload();
         }
     }
@@ -35,13 +37,13 @@ class ElgaClass {
     loadCommands () {
         fs.readdir(`${__dirname}/cmd/`, (err, files) => {
             if (err) {
-                return console.error(err);
+                return this.log.error(err);
             }
-            console.log(`Loading a total of ${files.length} commands.`);
+            this.log.info(`Loading a total of ${files.length} commands.`);
 
             files.forEach(file => {
                 const command = require(`./cmd/${file}`);
-            //    console.log(`Loading Command: ${command.props.name}`);
+            //    this.log.info(`Loading Command: ${command.props.name}`);
                 this.commands.set(command.props.name, command);
 
                 command.props.aliases.forEach(alias => this.aliases.set(alias, command.props.name));
@@ -54,9 +56,9 @@ class ElgaClass {
             const command = require('path').basename(path).slice(0, -3);
             try {
                 await this.reload(command);
-                console.log(`Reloaded ${command}.`);
+                this.log.info(`Reloaded ${command}.`);
             } catch (e) {
-                console.log(`Failed to reload ${command},\n${e}`);
+                this.log.error(`Failed to reload ${command},\n${e}`);
             }
         });
     }
@@ -81,18 +83,18 @@ class ElgaClass {
         }
 
         const emojiRegex = /<:[a-z]*shrug[a-z]*:[0-9]*>/g;
-        Object.keys(this.settings.replaces)
+        Object.keys(this.config.replaces)
             .filter(word => msg.content.toLowerCase().includes(word))
             .forEach(word => {
                 if (!emojiRegex.test(msg.content)) {
-                    msg.edit(msg.content.replace(word, this.settings.replaces[word]));
+                    msg.edit(msg.content.replace(word, this.config.replaces[word]));
                 }
             });
 
-        if (!msg.content.startsWith(this.settings.prefix)) {
+        if (!msg.content.startsWith(this.config.prefix)) {
             return;
         }
-        const command = msg.content.split(' ')[0].slice(this.settings.prefix.length);
+        const command = msg.content.split(' ')[0].slice(this.config.prefix.length);
         let cmd;
         if (this.commands.has(command)) {
             cmd = this.commands.get(command);
@@ -114,7 +116,7 @@ class ElgaClass {
     }
 
     missingArgsError (msg, props) {
-        msg.edit(`Missing required argument(s). Send \`${this.settings.prefix}help ${props.name}\` to view the syntax of this command.`);
+        msg.edit(`Missing required argument(s). Send \`${this.config.prefix}help ${props.name}\` to view the syntax of this command.`);
     }
 
     reload (command) {
@@ -142,20 +144,19 @@ class ElgaClass {
     }
 }
 
-class ElgaLogger {
-    constructor () {}
-    info (text) {
-        console.log(`[${Date().toString().split(' ').slice(1, 5).join(' ')}] `.green + text);
+Elga = new ElgaClass({
+    prefix: '.',
+    token: 'mfa.FjciRHIxxO6fFNd_A3zhbY6qu1dwyn-KPZPNYpDGYYS6gtBxKPiLRCzqri-DWs-aAx8W1TMnVAyc4OnCT2Gi',
+    embedColor: 16711680,
+    version: '0.0.1',
+    autoReload: true,
+    replaces: {
+        shrug: '¯\\_(ツ)_/¯',
+        lennyface: '( ͡° ͜ʖ ͡°)',
+        tableflip: '(╯°□°）╯︵ ┻━┻',
+        tableunflip: '┬─┬ノ( º _ ºノ)'
     }
-    warn (text) {
-        console.log(`[${Date().toString().split(' ').slice(1, 5).join(' ')}] `.yellow + text);
-    }
-    error (text) {
-        console.log(`[${Date().toString().split(' ').slice(1, 5).join(' ')}] `.red + text);
-    }
-};
-
-Elga = new ElgaClass();
+});
 
 /* Completed commands:
 
