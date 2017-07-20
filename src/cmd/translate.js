@@ -6,7 +6,7 @@ exports.run = async function (msg, args) {
         return msg.edit('Missing required arguments.');
     const res = await translate(args.slice(2).join(' '), { from: args[0], to: args[1] });
     msg.channel.send({ embed: {
-        color: settings.embedColor,
+        color: Elga.config.embedColor,
         fields: [
             { name: `Input (${args[0].toLowerCase() === 'auto' ? res.from.language.iso : args[0]})`, value: args.slice(2).join(' ') },
             { name: `Output (${args[1]})`, value: res.text }

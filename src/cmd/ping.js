@@ -1,6 +1,6 @@
 exports.run = function (msg) {
     msg.edit({ embed: {
-        color: Elga.settings.embedColor,
+        color: Elga.config.embedColor,
         title: ':ping_pong: Pong!',
         description: `Websocket: ${Elga.client.ping.toFixed()}ms\nMessage round-trip: ${Date.now() - msg.createdTimestamp}ms`
     } });

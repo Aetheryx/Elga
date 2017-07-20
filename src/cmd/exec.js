@@ -1,5 +1,5 @@
 const snekfetch = require('snekfetch');
-const exec = require('child_process').exec;
+const { exec } = require('child_process');
 
 exports.run = async function (msg, args) {
     if (!args[0]) {
@@ -15,15 +15,15 @@ exports.run = async function (msg, args) {
                 .catch(err => msg.channel.send(err.message));
 
             msg.channel.send({ embed: {
-                color: Elga.settings.embedColor,
+                color: Elga.config.embedColor,
                 description: `Console log exceeds 2000 characters. View [here](https://hastebin.com/${res.body.key}).`
             }});
         } else {
             if (stdout) {
-                msg.channel.send('Info: \n\`\`\`' + stdout + '\`\`\`'); // eslint-disable-line prefer-template
+                msg.channel.send('Info: \n```' + stdout + '```'); // eslint-disable-line prefer-template
             }
             if (stderr) {
-                stderr && msg.channel.send('Errors: \n\`\`\`' + stderr + '\`\`\`'); // eslint-disable-line prefer-template
+                stderr && msg.channel.send('Errors: \n```' + stderr + '```'); // eslint-disable-line prefer-template
             }
             if (!stderr && !stdout) {
                 msg.react('\u2611');

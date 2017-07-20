@@ -3,7 +3,7 @@ const rebootdb = require(`${__dirname}/../resources/.reboot.json`);
 
 exports.run = async function (msg) {
     await msg.edit({ embed: {
-        color: Elga.settings.embedColor,
+        color: Elga.config.embedColor,
         author: { name: 'Rebooting...', icon_url: 'https://i.redd.it/ski3yupjvy4z.gif' }
     }});
 
@@ -22,7 +22,7 @@ exports.boot = async function () {
     Elga.client.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).then(m => {
         const tStamp = Date.now() - rebootdb.startTime > 1000 ? `${(Date.now() - rebootdb.startTime) / 1000}s` : `${Date.now() - rebootdb.startTime}ms`;
         m.edit({ embed: {
-            color: Elga.settings.embedColor,
+            color: Elga.config.embedColor,
             description: 'Rebooted.',
             footer: { text: `Rebooted in ${tStamp}.` }
         } });

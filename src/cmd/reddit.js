@@ -26,7 +26,7 @@ exports.run = async function (msg, args) {
             .filter(child => child.data.title.length <= 256)
             .filter(child => !Elga.cmdCache.reddit.includes(child.data.id))[0];
         if (!post) {
-            return msg.edit(`No new posts found. Try specifying a time filter or clearing the 'Read posts' list with \`${Elga.settings.prefix}reddit reset\`.`);
+            return msg.edit(`No new posts found. Try specifying a time filter or clearing the 'Read posts' list with \`${Elga.config.prefix}reddit reset\`.`);
         }
 
         Elga.cmdCache.reddit.push(post.data.id);
@@ -43,7 +43,7 @@ exports.run = async function (msg, args) {
                 name: `/u/${post.data.author} posted to /${post.data.subreddit_name_prefixed}`,
                 url: `https://www.reddit.com/u/${post.data.author}`
             },
-            color: Elga.settings.embedColor,
+            color: Elga.config.embedColor,
             title: post.data.title,
             url: post.data.url,
             description: description,
@@ -68,7 +68,7 @@ exports.run = async function (msg, args) {
             .filter(child => child.data.title.length <= 256)
             .filter(child => !Elga.cmdCache.reddit.includes(child.data.id))[0];
         if (!post) {
-            return msg.edit(`No new posts found. Try specifying a time filter or clearing the 'Read posts' list with \`${Elga.settings.prefix}reddit reset\`.`);
+            return msg.edit(`No new posts found. Try specifying a time filter or clearing the 'Read posts' list with \`${Elga.config.prefix}reddit reset\`.`);
         }
 
         Elga.cmdCache.reddit.push(post.data.id);
@@ -84,7 +84,7 @@ exports.run = async function (msg, args) {
                 name: `Posted by /u/${post.data.author}`,
                 url: `https://www.reddit.com/u/${post.data.author}`
             },
-            color: Elga.settings.embedColor,
+            color: Elga.config.embedColor,
             title: post.data.title,
             url: post.data.url,
             description: description,

@@ -9,8 +9,8 @@ exports.run = function (msg) {
                     moment.duration(process.uptime(), 'seconds').format('dd:hh:mm:ss');
 
     const embed = {
-        color: Elga.settings.embedColor,
-        title: `Elga v${Elga.settings.version}`,
+        color: Elga.config.embedColor,
+        title: `Elga v${Elga.config.version}`,
         fields: [
             { name: 'Uptime', value: uptime, inline: true },
             { name: 'Websocket Ping', value: `${Elga.client.ping.toFixed()}ms`, inline: true },

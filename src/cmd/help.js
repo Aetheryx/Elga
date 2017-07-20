@@ -13,10 +13,10 @@ exports.run = function (msg, args) {
     const props = Elga.commands.has(args[0]) ? Elga.commands.get(args[0]).props : Elga.commands.get(Elga.aliases.get(args[0])).props;
     msg.edit({ embed: {
         title: `Help for command: ${props.name}`,
-        color: Elga.settings.embedColor,
+        color: Elga.config.embedColor,
         fields: [
             { 'name': 'Description: ', 'value': props.description, inline: false },
-            { 'name': 'Usage: ', 'value': props.usage.replace('{command}', Elga.settings.prefix + props.name), inline: false },
+            { 'name': 'Usage: ', 'value': props.usage.replace('{command}', Elga.config.prefix + props.name), inline: false },
             { 'name': 'Aliases: ', 'value': props.aliases[0] ? props.aliases.join(', ') : 'None', inline: false }
         ]
     } });

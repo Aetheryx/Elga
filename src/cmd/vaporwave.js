@@ -18,4 +18,9 @@ const charToFullWidth = char => {
         : char
 }
 
-const stringToFullWidth = string => string.split('').map(charToFullWidth).join('')
+const stringToFullWidth = string => string.split('').map(char => {
+    const c = char.charCodeAt(0)
+    return c >= 33 && c <= 126
+        ? String.fromCharCode(( c - 33 ) + 65281)
+        : char
+}).join('')
