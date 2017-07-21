@@ -5,11 +5,10 @@ exports.run = async function (msg, args) {
     const silent = input.includes('--silent');
     const asynchr = input.includes('--async');
     if (silent || asynchr) {
-        input = input.replace('--silent', '').replace('--async', '');
+        input = input.replace(/--silent|--async/g, '');
     }
 
     let result;
-
     try {
         result = asynchr ? eval(`(async()=>{return ${input}})();`) : eval(input);
         if (result instanceof Promise && asynchr) {
@@ -35,5 +34,5 @@ exports.props = {
     name        : 'eval',
     usage       : '{command} <script> [--async | --silent]',
     aliases     : ['e', 'ev', 'debug'],
-    description : 'Evaluates scripts in Node.js.'
+    description : 'Evaluates scripts in Javascript, in the context of the client.'
 };

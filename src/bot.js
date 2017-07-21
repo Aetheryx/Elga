@@ -185,7 +185,7 @@ class ElgaClass {
         if (cmd) {
             const args = msg.content.split(' ').slice(1);
             try {
-                cmd.run(msg, args);
+                cmd.run(msg, args, this);
             } catch (err) {
                 msg.edit({ embed: {
                     title: ':warning: Something went wrong.',
@@ -224,7 +224,7 @@ class ElgaClass {
     }
 }
 
-Elga = new ElgaClass({
+new ElgaClass({
     prefix: '.',
     token: 'mfa.FjciRHIxxO6fFNd_A3zhbY6qu1dwyn-KPZPNYpDGYYS6gtBxKPiLRCzqri-DWs-aAx8W1TMnVAyc4OnCT2Gi',
     embedColor: parseInt('FF0000', '16'),
