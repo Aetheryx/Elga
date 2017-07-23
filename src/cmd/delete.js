@@ -1,4 +1,4 @@
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     let messages = await msg.channel.fetchMessages({ limit: 100 });
     messages = messages.filterArray(message => message.author.id === Elga.client.user.id);
     messages.length = parseInt(args[0]) ? parseInt(args[0]) + 1 : 2;

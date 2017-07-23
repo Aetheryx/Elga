@@ -1,4 +1,4 @@
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     let command;
     if (Elga.commands.has(args[0])) {
         command = args[0];

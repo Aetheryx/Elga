@@ -3,79 +3,13 @@ const db = require('sqlite');
 db.open(`${__dirname}/elgadb.sqlite`);
 const fs = require('fs');
 const ElgaLogger = require(`${__dirname}/util/logger.js`);
-const prebuilts = {
-    tags: {
-        emojify: (undefined, str) => {
-            const specialCodes = {
-                '0': ':zero: ',
-                '1': ':one: ',
-                '2': ':two: ',
-                '3': ':three: ',
-                '4': ':four: ',
-                '5': ':five: ',
-                '6': ':six: ',
-                '7': ':seven: ',
-                '8': ':eight: ',
-                '9': ':nine: ',
-                '#': ':hash: ',
-                '*': ':asterisk: ',
-                '?': ':grey_question: ',
-                '!': ':grey_exclamation: ',
-                ' ': '   '
-            };
-            return str.toLowerCase().split('').map(letter => {
-                if (/[a-z]/g.test(letter)) {
-                    return `:regional_indicator_${letter}: `;
-                } else if (specialCodes[letter]) {
-                    return specialCodes[letter];
-                }
-                return letter;
-            }).join('');
-        },
-        super: (undefined, str) => {
-            const normals = ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-            const supers = ' ⁰¹²³⁴⁵⁶⁷⁸⁹ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖᑫʳˢᵗᵘᵛʷˣʸᶻᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᑫᴿˢᵀᵁⱽᵂˣʸᶻ'.split('');
-            return str.split('').map(char => {
-                if (normals.includes(char)) {
-                    return supers[normals.indexOf(char)];
-                } else {
-                    return char;
-                }
-            }).join('');
-        },
-        upsidedown: (undefined, str) => {
-            const normals = ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-            const upsidedowns = ' 0ƖᄅƐㄣϛ9ㄥ86ɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz∀qƆpƎℲפHIſʞ˥WNOԀQɹS┴∩ΛMX⅄Z'.split('');
-            return str.split('').map(char => {
-                if (normals.includes(char)) {
-                    return upsidedowns[normals.indexOf(char)];
-                } else {
-                    return char;
-                }
-            }).join('');
-        },
-        flip: (undefined, str) => {
-            return str.split('').reverse().join('');
-        }
-    },
-    replaces: {
-        shrug: '¯\\_(ツ)_/¯',
-        lenny: '( ͡° ͜ʖ ͡°)',
-        tableflip: '(╯°□°）╯︵ ┻━┻',
-        tableunflip: '┬─┬ノ( º _ ºノ)'
-    }
+const prebuilts = require(`${__dirname}/util/prebuilts.js`);
 
-
-};
-
-class ElgaClass {
+class Elga {
     constructor (config) {
         this.client = new Client();
         this.db = db;
         this.config = config;
-        config.version = require(`${__dirname}/../package.json`).version;
-        config.tags = Object.assign(config.tags || {}, prebuilts.tags);
-        config.replaces = Object.assign(config.replaces || {}, prebuilts.replaces);
         this.commands = new Collection();
         this.aliases  = new Collection();
         this.log = new ElgaLogger();
@@ -93,12 +27,20 @@ class ElgaClass {
     }
 
     async onceReady () {
-        require(`${__dirname}/cmd/reboot.js`).boot();
+        require(`${__dirname}/cmd/reboot.js`).boot(this);
+        this.parseConfig();
         this.loadCommands();
         this.initTables();
         if (this.config.autoReload) {
             this.initAutoReload();
         }
+    }
+
+    parseConfig () {
+        this.config.embedColor = this.client.resolver.resolveColor(this.config.embedColor);
+        this.config.version = require(`${__dirname}/../package.json`).version;
+        this.config.tags = Object.assign(this.config.tags || {}, prebuilts.tags);
+        this.config.replaces = Object.assign(this.config.replaces || {}, prebuilts.replaces);
     }
 
     loadCommands () {
@@ -109,11 +51,14 @@ class ElgaClass {
             this.log.info(`Loading a total of ${files.length} commands.`);
 
             files.forEach(file => {
-                const command = require(`./cmd/${file}`);
-            //    this.log.info(`Loading Command: ${command.props.name}`);
-                this.commands.set(command.props.name, command);
-
-                command.props.aliases.forEach(alias => this.aliases.set(alias, command.props.name));
+                let command;
+                try {
+                    command = require(`./cmd/${file}`);
+                    this.commands.set(command.props.name, command);
+                    command.props.aliases.forEach(alias => this.aliases.set(alias, command.props.name));
+                } catch (err) {
+                    this.log.error(`Error while loading ${file}:\n${err.stack}`);
+                }
             });
         });
     }
@@ -142,6 +87,10 @@ class ElgaClass {
             channelName      TEXT,
             guildName        TEXT,
             createdTimestamp INTEGER);`);
+        await this.db.run(`CREATE TABLE IF NOT EXISTS reboot (
+            channelID TEXT,
+            messageID TEXT,
+            startTime INTEGER);`);
     }
 
     async onMessage (msg) {
@@ -174,7 +123,7 @@ class ElgaClass {
         if (!msg.content.startsWith(this.config.prefix)) {
             return;
         }
-        const command = msg.content.split(' ')[0].slice(this.config.prefix.length);
+        const command = msg.content.slice(this.config.prefix.length).split(' ')[0];
         let cmd;
         if (this.commands.has(command)) {
             cmd = this.commands.get(command);
@@ -185,7 +134,7 @@ class ElgaClass {
         if (cmd) {
             const args = msg.content.split(' ').slice(1);
             try {
-                cmd.run(msg, args, this);
+                cmd.run(this, msg, args);
             } catch (err) {
                 msg.edit({ embed: {
                     title: ':warning: Something went wrong.',
@@ -203,7 +152,7 @@ class ElgaClass {
         return new Promise((resolve, reject) => {
             try {
                 delete require.cache[require.resolve(`./cmd/${command}`)];
-                const cmd = require(`./cmd/${command}`);
+                const cmd = require(`${__dirname}/cmd/${command}`);
                 this.commands.delete(command);
 
                 this.aliases.forEach((cmd, alias) => {
@@ -224,10 +173,10 @@ class ElgaClass {
     }
 }
 
-new ElgaClass({
+new Elga({
     prefix: '.',
     token: 'mfa.FjciRHIxxO6fFNd_A3zhbY6qu1dwyn-KPZPNYpDGYYS6gtBxKPiLRCzqri-DWs-aAx8W1TMnVAyc4OnCT2Gi',
-    embedColor: parseInt('FF0000', '16'),
+    embedColor: '#FF0000',
     autoReload: true
 });
 
@@ -241,5 +190,6 @@ new ElgaClass({
  * Targets:
  * AFK settings
  * Playing status
+ * Some solution for saving prefixes permanently and not per-session
  *
 */

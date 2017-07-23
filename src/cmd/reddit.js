@@ -1,6 +1,6 @@
 const snekfetch = require('snekfetch');
 
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     if (!args[0]) {
         return Elga.missingArgsError(msg, this.props);
     }

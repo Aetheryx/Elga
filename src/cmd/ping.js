@@ -1,4 +1,4 @@
-exports.run = function (msg) {
+exports.run = function (Elga, msg) {
     msg.edit({ embed: {
         color: Elga.config.embedColor,
         title: ':ping_pong: Pong!',

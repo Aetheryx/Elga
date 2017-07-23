@@ -1,6 +1,6 @@
 const util = require('util');
 
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     let input = args.join(' ');
     const silent = input.includes('--silent');
     const asynchr = input.includes('--async');

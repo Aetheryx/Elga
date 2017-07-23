@@ -1,7 +1,7 @@
 const snekfetch = require('snekfetch');
 const { exec } = require('child_process');
 
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     if (!args[0]) {
         return msg.edit('No arguments sent.');
     }

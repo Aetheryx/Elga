@@ -1,7 +1,7 @@
 const fs = require('fs');
 const rebootdb = require(`${__dirname}/../resources/.reboot.json`);
 
-exports.run = async function (msg) {
+exports.run = async function (Elga, msg) {
     await msg.edit({ embed: {
         color: Elga.config.embedColor,
         author: { name: 'Rebooting...', icon_url: 'https://i.redd.it/ski3yupjvy4z.gif' }
@@ -15,7 +15,7 @@ exports.run = async function (msg) {
     process.exit();
 };
 
-exports.boot = async function () {
+exports.boot = async function (Elga) {
     if (!Elga.client.channels.get(rebootdb.channelID)) {
         return;
     }

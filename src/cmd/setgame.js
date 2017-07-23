@@ -1,4 +1,4 @@
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     if (args.join(' ').length > 128) {
         return msg.edit({ embed: {
             color: Elga.config.embedColor,

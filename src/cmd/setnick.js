@@ -1,5 +1,5 @@
 /* eslint-disable */
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     if (msg.channel.type === 'dm' || !msg.member.hasPermission('CHANGE_NICKNAME'))
         return msg.edit({ embed: {
             color: Elga.config.embedColor,
