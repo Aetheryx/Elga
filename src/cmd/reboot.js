@@ -4,8 +4,8 @@ const rebootdb = require(`${__dirname}/../resources/.reboot.json`);
 exports.run = async function (Elga, msg) {
     await msg.edit({ embed: {
         color: Elga.config.embedColor,
-        author: { name: 'Rebooting...', icon_url: 'https://i.redd.it/ski3yupjvy4z.gif' }
-    }});
+        author: { name: 'Rebooting...', icon_url: 'http://i.imgur.com/81nH7vJ.gif' }
+    } });
 
     await fs.writeFileSync(`${__dirname}/../resources/.reboot.json`, JSON.stringify({
         'channelID': msg.channel.id,
@@ -19,9 +19,9 @@ exports.boot = async function (Elga) {
     if (!Elga.channels.get(rebootdb.channelID)) {
         return;
     }
-    Elga.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).then(m => {
+    Elga.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).then(msg => {
         const tStamp = Date.now() - rebootdb.startTime > 1000 ? `${(Date.now() - rebootdb.startTime) / 1000}s` : `${Date.now() - rebootdb.startTime}ms`;
-        m.edit({ embed: {
+        msg.edit({ embed: {
             color: Elga.config.embedColor,
             description: 'Rebooted.',
             footer: { text: `Rebooted in ${tStamp}.` }
@@ -33,5 +33,5 @@ exports.props = {
     name        : 'reboot',
     usage       : '{command}',
     aliases     : ['restart'],
-    description : 'Reboots the selfbot.'
+    description : 'Reboots Elga.'
 };

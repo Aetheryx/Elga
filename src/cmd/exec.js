@@ -17,7 +17,7 @@ exports.run = async function (Elga, msg, args) {
             msg.channel.send({ embed: {
                 color: Elga.config.embedColor,
                 description: `Console log exceeds 2000 characters. View [here](https://hastebin.com/${res.body.key}).`
-            }});
+            } });
         } else {
             if (stdout) {
                 msg.channel.send(`Info:\n${Elga.codeblock(stdout)}`);

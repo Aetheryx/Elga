@@ -2,14 +2,13 @@ const { Client, Collection } = require('discord.js');
 const db = require('sqlite');
 db.open(`${__dirname}/elgadb.sqlite`);
 const fs = require('fs');
-const ElgaLogger = require(`${__dirname}/util/logger.js`);
 const prebuilts = require(`${__dirname}/util/prebuilts.js`);
 
 module.exports = class Elga extends Client {
     constructor (config, customfns) {
         super();
-        this.log = new ElgaLogger();
-        this.log.info('Logging in..');
+        this.log = require(`${__dirname}/util/logger.js`);
+        this.log('Logging in..');
         this.db = db;
         this.commands = new Collection();
         this.aliases  = new Collection();
@@ -26,6 +25,7 @@ module.exports = class Elga extends Client {
     parseConfig (config, customfns) {
         if (typeof config === 'string') {
             this.config = require(this.config);
+            this.config.src = config;
         } else if (typeof config !== 'object' || config === null) {
             throw new TypeError('The provided config argument needs to be an object or a path to the config file.', __filename);
         }
@@ -33,7 +33,7 @@ module.exports = class Elga extends Client {
             throw new TypeError('The provided token needs to be a string.', __filename);
         }
         if (!this.config.embedColor) {
-            this.log.warn('No embed color provided in config. Using #2E0854.');
+            this.log('No embed color provided in config. Using #2E0854.', 'warn');
         }
 
         this.config.tags       = Object.assign(customfns.tags || {}, prebuilts.tags);
@@ -43,7 +43,8 @@ module.exports = class Elga extends Client {
     }
 
     onReady () {
-        this.log.info(`Logged in as ${this.user.tag}, running Elga v${this.config.version}.`);
+        this.log(`Logged in as ${this.user.tag}, running Elga v${this.config.version}.`);
+        this.user.setGame(this.config.playingStatus);
         delete this.user.email;
     }
 
@@ -59,9 +60,9 @@ module.exports = class Elga extends Client {
     loadCommands () {
         fs.readdir(`${__dirname}/cmd/`, (err, files) => {
             if (err) {
-                return this.log.error(err);
+                return this.log(err, 'error');
             }
-            this.log.info(`Loading a total of ${files.length} commands.`);
+            this.log(`Loading a total of ${files.length} commands.`);
 
             files.forEach(file => {
                 try {
@@ -69,7 +70,7 @@ module.exports = class Elga extends Client {
                     this.commands.set(command.props.name, command);
                     command.props.aliases.forEach(alias => this.aliases.set(alias, command.props.name));
                 } catch (err) {
-                    this.log.error(`Error while loading ${file}:\n${err.stack}`);
+                    this.log(`Error while loading ${file}:\n${err.stack}`, 'error');
                 }
             });
         });
@@ -80,9 +81,9 @@ module.exports = class Elga extends Client {
             const command = require('path').basename(path).slice(0, -3);
             try {
                 await this.reload(command);
-                this.log.info(`Reloaded ${command}.`);
+                this.log(`Reloaded ${command}.`);
             } catch (err) {
-                this.log.error(`Failed to reload ${command},\n${err.stack}`);
+                this.log(`Failed to reload ${command},\n${err.stack}`, 'error');
             }
         });
     }
@@ -104,7 +105,7 @@ module.exports = class Elga extends Client {
             messageID TEXT,
             startTime INTEGER);`);
         await this.db.run(`CREATE TABLE IF NOT EXISTS memo (
-            memoID INTEGER,
+            memoID   INTEGER,
             memoText TEXT);`);
     }
 
@@ -169,7 +170,8 @@ module.exports = class Elga extends Client {
             color: 0xFF0000,
             title: ':warning: Something went wrong.',
             description: this.codeblock(err.stack.length < 1900 ? err.stack : err.message)
-        }});
+        } });
+        this.log(`Error while running command ${msg.content.slice(this.config.prefix.length).split(' ')[0]} with args ${JSON.stringify(msg.content.split(' ').slice(1))}:\n${err.stack}`, 'error');
     }
 
     reload (command) {
@@ -203,8 +205,7 @@ module.exports = class Elga extends Client {
  * WIP:
  * fml
  * reboot (gif, mostly)
- * reddit (LINT!)
- * tags
+ * reddit
 
  * Targets:
  * AFK settings

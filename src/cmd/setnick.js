@@ -4,7 +4,7 @@ exports.run = async function (Elga, msg, args) {
         return msg.edit({ embed: {
             color: Elga.config.embedColor,
             description: ':warning: You can\'t change your nickname here.'
-        }});
+        } });
     if (args.join(' ').length > 32)
         return msg.edit({ embed: {
             color: Elga.config.embedColor,
@@ -14,7 +14,7 @@ exports.run = async function (Elga, msg, args) {
     msg.edit({ embed: {
         color: Elga.config.embedColor,
         description: `:ballot_box_with_check: Nickname set to \`${msg.member.displayName}\`.`
-    }});
+    } });
 };
 
 exports.props = {
