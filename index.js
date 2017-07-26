@@ -1,15 +1,17 @@
 const { Client, Collection } = require('discord.js');
 const db = require('sqlite');
-db.open(`${__dirname}/elgadb.sqlite`);
 const fs = require('fs');
 const prebuilts = require(`${__dirname}/util/prebuilts.js`);
+const path = require('path');
 
-module.exports = class Elga extends Client {
+module.exports = class Elga extends Client { // require('path').basename(path).slice(0, -3);
     constructor (config, customfns) {
         super();
+        this.root = process.mainModule.filename.replace(path.basename(process.mainModule.filename), '');
         this.log = require(`${__dirname}/util/logger.js`);
         this.log('Logging in..');
         this.db = db;
+        db.open(`${this.root}/elgadb.sqlite`);
         this.commands = new Collection();
         this.aliases  = new Collection();
         this.config = config;
@@ -24,8 +26,8 @@ module.exports = class Elga extends Client {
 
     parseConfig (config, customfns) {
         if (typeof config === 'string') {
-            this.config = require(this.config);
-            this.config.src = config;
+            this.config = require(`${this.root}/${config}`);
+            this.config.src = `${this.root}/${config}`;
         } else if (typeof config !== 'object' || config === null) {
             throw new TypeError('The provided config argument needs to be an object or a path to the config file.', __filename);
         }
@@ -38,7 +40,7 @@ module.exports = class Elga extends Client {
 
         this.config.tags       = Object.assign(customfns.tags || {}, prebuilts.tags);
         this.config.replaces   = Object.assign(customfns.tags || {}, prebuilts.replaces);
-        this.config.version    = require(`${__dirname}/../package.json`).version;
+        this.config.version    = require(`${__dirname}/package.json`).version;
         this.config.embedColor = this.config.embedColor ? this.resolver.resolveColor(this.config.embedColor) : parseInt('2E0854', '16');
     }
 
