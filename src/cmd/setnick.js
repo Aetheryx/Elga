@@ -10,7 +10,7 @@ exports.run = async function (Elga, msg, args) {
             color: Elga.config.embedColor,
             description: 'You can\'t set your nickname to something that long.'
         } });
-    await msg.member.setNickname(args[0] || client.user.username);
+    await msg.member.setNickname(args[0] || Elga.user.username);
     msg.edit({ embed: {
         color: Elga.config.embedColor,
         description: `:ballot_box_with_check: Nickname set to \`${msg.member.displayName}\`.`

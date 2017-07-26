@@ -20,10 +20,10 @@ exports.run = async function (Elga, msg, args) {
             }});
         } else {
             if (stdout) {
-                msg.channel.send('Info: \n```' + stdout + '```'); // eslint-disable-line prefer-template
+                msg.channel.send(`Info:\n${Elga.codeblock(stdout)}`);
             }
             if (stderr) {
-                stderr && msg.channel.send('Errors: \n```' + stderr + '```'); // eslint-disable-line prefer-template
+                stderr && msg.channel.send(`Errors:\n${Elga.codeblock(stderr)}`);
             }
             if (!stderr && !stdout) {
                 msg.react('\u2611');

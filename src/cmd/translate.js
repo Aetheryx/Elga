@@ -1,7 +1,7 @@
 /* eslint-disable */
 //const translate = require('google-translate-api');
 
-exports.run = async function (msg, args) {
+exports.run = async function (Elga, msg, args) {
     if (!args[2])
         return msg.edit('Missing required arguments.');
     const res = await translate(args.slice(2).join(' '), { from: args[0], to: args[1] });

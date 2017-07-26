@@ -17,7 +17,7 @@ exports.run = async function (Elga, msg, args) {
         if (typeof result !== 'string') {
             result = util.inspect(result, { depth: 0 });
         }
-        const tokenRegex = new RegExp(Elga.client.token, 'gi');
+        const tokenRegex = new RegExp(Elga.token, 'gi');
         result = result.replace(tokenRegex, '[TOKEN]');
     } catch (err) {
         result = err.message;

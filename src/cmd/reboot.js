@@ -16,10 +16,10 @@ exports.run = async function (Elga, msg) {
 };
 
 exports.boot = async function (Elga) {
-    if (!Elga.client.channels.get(rebootdb.channelID)) {
+    if (!Elga.channels.get(rebootdb.channelID)) {
         return;
     }
-    Elga.client.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).then(m => {
+    Elga.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).then(m => {
         const tStamp = Date.now() - rebootdb.startTime > 1000 ? `${(Date.now() - rebootdb.startTime) / 1000}s` : `${Date.now() - rebootdb.startTime}ms`;
         m.edit({ embed: {
             color: Elga.config.embedColor,

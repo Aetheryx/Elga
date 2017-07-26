@@ -5,10 +5,10 @@ exports.run = async function (Elga, msg, args) {
             description: 'You can\'t set your game to something that long.'
         } });
     }
-    await Elga.client.user.setGame(args.join(' '));
+    await Elga.user.setGame(args.join(' '));
     msg.edit({ embed: {
         color: Elga.config.embedColor,
-        description: args[0] ? `Playing status set to ${Elga.client.user.presence.game.name}.` : 'Playing status cleared.'
+        description: args[0] ? `Playing status set to ${Elga.user.presence.game.name}.` : 'Playing status cleared.'
     } });
 };
 

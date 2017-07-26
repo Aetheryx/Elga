@@ -1,6 +1,6 @@
 module.exports = {
     tags: {
-        emojify: (undefined, str) => {
+        emojify: (str) => {
             const specialCodes = {
                 '0': ':zero: ',
                 '1': ':one: ',
@@ -28,7 +28,7 @@ module.exports = {
                 }
             }).join('');
         },
-        super: (undefined, str) => {
+        super: (str) => {
             const normals = ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             const supers = ' ⁰¹²³⁴⁵⁶⁷⁸⁹ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖᑫʳˢᵗᵘᵛʷˣʸᶻᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᑫᴿˢᵀᵁⱽᵂˣʸᶻ'.split('');
             return str.split('').map(char => {
@@ -39,7 +39,7 @@ module.exports = {
                 }
             }).join('');
         },
-        upsidedown: (undefined, str) => {
+        upsidedown: (str) => {
             const normals = ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             const upsidedowns = ' 0ƖᄅƐㄣϛ9ㄥ86ɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz∀qƆpƎℲפHIſʞ˥WNOԀQɹS┴∩ΛMX⅄Z'.split('');
             return str.split('').map(char => {
@@ -50,7 +50,7 @@ module.exports = {
                 }
             }).join('');
         },
-        flip: (undefined, str) => {
+        flip: (str) => {
             return str.split('').reverse().join('');
         }
     },
