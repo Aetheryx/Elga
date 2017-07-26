@@ -1,0 +1,23 @@
+{
+  "name": "elga",
+  "version": "0.0.2",
+  "description": "A selfbot for Discord built using the Discord.js API wrapper.",
+  "main": "elga.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aetheryx/Elga.git"
+  },
+  "keywords": [
+    "discord",
+    "selfbot"
+  ],
+  "author": "Aetheryx",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Aetheryx/Elga/issues"
+  },
+  "homepage": "https://github.com/Aetheryx/Elga#readme"
+}
