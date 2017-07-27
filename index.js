@@ -9,6 +9,7 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
         super();
         this.root = process.mainModule.filename.replace(path.basename(process.mainModule.filename), '');
         this.log = require(`${__dirname}/util/logger.js`);
+        this.log('Why are you here? Go away. Elga is still in dev.\nSeriously though. Continue at your own risk. Ridiculous RAM usage and bugs await you. Turn back while you can!!', 'warn');
         this.log('Logging in..');
         this.db = db;
         db.open(`${this.root}/elgadb.sqlite`);
@@ -52,15 +53,12 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
 
     async onceReady () {
         require(`${__dirname}/cmd/reboot.js`).boot(this);
-        this.loadCommands();
+        this.loadCommands(`${__dirname}/cmd/`, true);
         this.initTables();
-        if (this.config.autoReload) {
-            this.initAutoReload();
-        }
     }
 
-    loadCommands () {
-        fs.readdir(`${__dirname}/cmd/`, (err, files) => {
+    loadCommands (path, prebuilt) {
+        fs.readdir(prebuilt ? `${__dirname}/cmd/` : `${this.root}/${path}`, (err, files) => {
             if (err) {
                 return this.log(err, 'error');
             }
@@ -68,7 +66,7 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
 
             files.forEach(file => {
                 try {
-                    const command = require(`./cmd/${file}`);
+                    const command = require(prebuilt ? `${__dirname}/cmd/${file}` : `${this.root}/${path}/${file}`);
                     this.commands.set(command.props.name, command);
                     command.props.aliases.forEach(alias => this.aliases.set(alias, command.props.name));
                 } catch (err) {
@@ -76,13 +74,16 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
                 }
             });
         });
+        if (this.config.autoReload) {
+            this.initAutoReload(prebuilt ? `${__dirname}/cmd/` : `${this.root}/${path}`);
+        }
     }
 
-    initAutoReload () {
-        require('chokidar').watch(`${__dirname}/cmd/`).on('change', async (path) => {
+    initAutoReload (path) {
+        require('chokidar').watch(path).on('change', async (path) => {
             const command = require('path').basename(path).slice(0, -3);
             try {
-                await this.reload(command);
+                await this.reload(command, path);
                 this.log(`Reloaded ${command}.`);
             } catch (err) {
                 this.log(`Failed to reload ${command},\n${err.stack}`, 'error');
@@ -176,11 +177,12 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
         this.log(`Error while running command ${msg.content.slice(this.config.prefix.length).split(' ')[0]} with args ${JSON.stringify(msg.content.split(' ').slice(1))}:\n${err.stack}`, 'error');
     }
 
-    reload (command) {
+    reload (command, path) {
         return new Promise((resolve, reject) => {
             try {
-                delete require.cache[require.resolve(`./cmd/${command}`)];
-                const cmd = require(`${__dirname}/cmd/${command}`);
+                this.log(path);
+                delete require.cache[require.resolve(`${path}/${command}`)];
+                const cmd = require(`${path}/${command}`);
                 this.commands.delete(command);
 
                 this.aliases.forEach((cmd, alias) => {
