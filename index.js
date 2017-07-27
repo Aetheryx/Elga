@@ -3,13 +3,28 @@ const db = require('sqlite');
 const fs = require('fs');
 const prebuilts = require(`${__dirname}/util/prebuilts.js`);
 const path = require('path');
+const clientOptions = {
+    disabledEvents: [
+        'TYPING_START',
+        'RELATIONSHIP_ADD',
+        'RELATIONSHIP_REMOVE',
+        'VOICE_STATE_UPDATE',
+        'VOICE_SERVER_UPDATE',
+        'GUILD_BAN_ADD',
+        'GUILD_BAN_REMOVE',
+        'USER_NOTE_UPDATE',
+        'USER_SETTINGS_UPDATE'
+    ],
+    messageCacheMaxSize: 100,
+    disableEveryone: true
+};
 
-module.exports = class Elga extends Client { // require('path').basename(path).slice(0, -3);
+module.exports = class Elga extends Client {
     constructor (config, customfns) {
-        super();
+        super(config.clientOptions || clientOptions);
         this.root = process.mainModule.filename.replace(path.basename(process.mainModule.filename), '');
         this.log = require(`${__dirname}/util/logger.js`);
-        this.log('Why are you here? Go away. Elga is still in dev.\nSeriously though. Continue at your own risk. Ridiculous RAM usage and bugs await you. Turn back while you can!!', 'warn');
+        this.log('Why are you here? Go away. Elga is still in dev.\nSeriously though. Continue at your own risk. High RAM usage and bugs await you. Turn back while you can!!', 'warn');
         this.log('Logging in..');
         this.db = db;
         db.open(`${this.root}/elgadb.sqlite`);
@@ -19,6 +34,7 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
         this.customfns = customfns;
         this.parseConfig(config, customfns || {});
         this.commandCache = { reddit: [], fml: [] };
+        this.loadCommands(`${__dirname}/cmd/`, true);
         this.login(this.config.token);
         this.on('ready', this.onReady);
         this.once('ready', this.onceReady);
@@ -53,7 +69,6 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
 
     async onceReady () {
         require(`${__dirname}/cmd/reboot.js`).boot(this);
-        this.loadCommands(`${__dirname}/cmd/`, true);
         this.initTables();
     }
 
@@ -62,7 +77,7 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
             if (err) {
                 return this.log(err, 'error');
             }
-            this.log(`Loading a total of ${files.length} commands.`);
+            this.log(`Loading a total of ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`);
 
             files.forEach(file => {
                 try {
@@ -202,18 +217,3 @@ module.exports = class Elga extends Client { // require('path').basename(path).s
         });
     }
 };
-
-
-
-/* Progress
- * WIP:
- * fml
- * reboot (gif, mostly)
- * reddit
-
- * Targets:
- * AFK settings
- * Playing status
- * Some solution for saving prefixes permanently and not per-session
- *
-*/
