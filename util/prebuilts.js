@@ -59,5 +59,20 @@ module.exports = {
         lenny: '( ͡° ͜ʖ ͡°)',
         tableflip: '(╯°□°）╯︵ ┻━┻',
         tableunflip: '┬─┬ノ( º _ ºノ)'
+    },
+    clientOptions: {
+        disabledEvents: [
+            'TYPING_START',
+            'RELATIONSHIP_ADD',
+            'RELATIONSHIP_REMOVE',
+            'VOICE_STATE_UPDATE',
+            'VOICE_SERVER_UPDATE',
+            'GUILD_BAN_ADD',
+            'GUILD_BAN_REMOVE',
+            'USER_NOTE_UPDATE',
+            'USER_SETTINGS_UPDATE'
+        ],
+        messageCacheMaxSize: 100,
+        disableEveryone: true
     }
 };

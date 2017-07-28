@@ -1,64 +1,27 @@
-const { Client, Collection } = require('discord.js');
-const db = require('sqlite');
+const { Client, Collection, Constants } = require('discord.js');
 const fs = require('fs');
-const prebuilts = require(`${__dirname}/util/prebuilts.js`);
-const path = require('path');
-const clientOptions = {
-    disabledEvents: [
-        'TYPING_START',
-        'RELATIONSHIP_ADD',
-        'RELATIONSHIP_REMOVE',
-        'VOICE_STATE_UPDATE',
-        'VOICE_SERVER_UPDATE',
-        'GUILD_BAN_ADD',
-        'GUILD_BAN_REMOVE',
-        'USER_NOTE_UPDATE',
-        'USER_SETTINGS_UPDATE'
-    ],
-    messageCacheMaxSize: 100,
-    disableEveryone: true
-};
+const { join, basename } = require('path');
+const prebuilts = require(join(__dirname, 'util', 'prebuilts.js'));
+const log = require(join(__dirname, 'util', 'logger.js'));
 
-module.exports = class Elga extends Client {
-    constructor (config, customfns) {
-        super(config.clientOptions || clientOptions);
-        this.root = process.mainModule.filename.replace(path.basename(process.mainModule.filename), '');
-        this.log = require(`${__dirname}/util/logger.js`);
+class Elga extends Client {
+    constructor (config, db, absPath) {
+        super(config.clientOptions || prebuilts.clientOptions);
+        this.absPath = absPath;
+        this.log = log;
+        this.db = db;
+        this.initTables();
         this.log('Why are you here? Go away. Elga is still in dev.\nSeriously though. Continue at your own risk. High RAM usage and bugs await you. Turn back while you can!!', 'warn');
         this.log('Logging in..');
-        this.db = db;
-        db.open(`${this.root}/elgadb.sqlite`);
         this.commands = new Collection();
         this.aliases  = new Collection();
         this.config = config;
-        this.customfns = customfns;
-        this.parseConfig(config, customfns || {});
         this.commandCache = { reddit: [], fml: [] };
-        this.loadCommands(`${__dirname}/cmd/`, true);
+        this.loadCommands(join(__dirname, 'cmd'), true);
         this.login(this.config.token);
         this.on('ready', this.onReady);
         this.once('ready', this.onceReady);
         this.on('message', this.onMessage);
-    }
-
-    parseConfig (config, customfns) {
-        if (typeof config === 'string') {
-            this.config = require(`${this.root}/${config}`);
-            this.config.src = `${this.root}/${config}`;
-        } else if (typeof config !== 'object' || config === null) {
-            throw new TypeError('The provided config argument needs to be an object or a path to the config file.', __filename);
-        }
-        if (typeof this.config.token !== 'string') {
-            throw new TypeError('The provided token needs to be a string.', __filename);
-        }
-        if (!this.config.embedColor) {
-            this.log('No embed color provided in config. Using #2E0854.', 'warn');
-        }
-
-        this.config.tags       = Object.assign(customfns.tags || {}, prebuilts.tags);
-        this.config.replaces   = Object.assign(customfns.tags || {}, prebuilts.replaces);
-        this.config.version    = require(`${__dirname}/package.json`).version;
-        this.config.embedColor = this.config.embedColor ? this.resolver.resolveColor(this.config.embedColor) : parseInt('2E0854', '16');
     }
 
     onReady () {
@@ -68,20 +31,20 @@ module.exports = class Elga extends Client {
     }
 
     async onceReady () {
-        require(`${__dirname}/cmd/reboot.js`).boot(this);
-        this.initTables();
+        require(join(__dirname, 'cmd', 'reboot.js')).boot(this);
     }
 
     loadCommands (path, prebuilt) {
-        fs.readdir(prebuilt ? `${__dirname}/cmd/` : `${this.root}/${path}`, (err, files) => {
+        path = prebuilt ? join(__dirname, 'cmd') : join(this.absPath, path);
+        fs.readdir(path, (err, files) => {
             if (err) {
                 return this.log(err, 'error');
             }
-            this.log(`Loading a total of ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`);
+            this.log(`Loading ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`);
 
             files.forEach(file => {
                 try {
-                    const command = require(prebuilt ? `${__dirname}/cmd/${file}` : `${this.root}/${path}/${file}`);
+                    const command = require(join(path, file));
                     this.commands.set(command.props.name, command);
                     command.props.aliases.forEach(alias => this.aliases.set(alias, command.props.name));
                 } catch (err) {
@@ -90,20 +53,8 @@ module.exports = class Elga extends Client {
             });
         });
         if (this.config.autoReload) {
-            this.initAutoReload(prebuilt ? `${__dirname}/cmd/` : `${this.root}/${path}`);
+            this.initAutoReload(path);
         }
-    }
-
-    initAutoReload (path) {
-        require('chokidar').watch(path).on('change', async (path) => {
-            const command = require('path').basename(path).slice(0, -3);
-            try {
-                await this.reload(command, path);
-                this.log(`Reloaded ${command}.`);
-            } catch (err) {
-                this.log(`Failed to reload ${command},\n${err.stack}`, 'error');
-            }
-        });
     }
 
     async initTables () {
@@ -180,24 +131,35 @@ module.exports = class Elga extends Client {
     }
 
     codeblock (str, lang) {
-        return '```' + (lang || '') + '\n' + str + '\n```'; // eslint-disable-line prefer-template
+        return `${'```'}${lang || ''}\n${str}\n${'```'}`;
     }
 
     cmdErr (msg, err) {
         msg.edit({ embed: {
             color: 0xFF0000,
             title: ':warning: Something went wrong.',
-            description: this.codeblock(err.stack.length < 1900 ? err.stack : err.message)
+            description: this.codeblock(err.stack.length < 1500 ? err.stack : err.message)
         } });
         this.log(`Error while running command ${msg.content.slice(this.config.prefix.length).split(' ')[0]} with args ${JSON.stringify(msg.content.split(' ').slice(1))}:\n${err.stack}`, 'error');
+    }
+
+    initAutoReload (path) {
+        require('chokidar').watch(path).on('change', async (cPath) => {
+            const command = basename(cPath).slice(0, -3);
+            try {
+                await this.reload(command, path);
+                this.log(`Reloaded ${command}.`);
+            } catch (err) {
+                this.log(`Failed to reload ${command},\n${err.stack}`, 'error');
+            }
+        });
     }
 
     reload (command, path) {
         return new Promise((resolve, reject) => {
             try {
-                this.log(path);
-                delete require.cache[require.resolve(`${path}/${command}`)];
-                const cmd = require(`${path}/${command}`);
+                delete require.cache[require.resolve(join(path, command))];
+                const cmd = require(join(path, command));
                 this.commands.delete(command);
 
                 this.aliases.forEach((cmd, alias) => {
@@ -216,4 +178,58 @@ module.exports = class Elga extends Client {
             }
         });
     }
+}
+
+exports.create = async (config, customfns) => {
+    const absPath = process.mainModule.filename.replace(basename(process.mainModule.filename), '');
+    if (typeof config === 'string') {
+        const src = config;
+        config = require(join(absPath, config));
+        config.src = join(absPath, src);
+    } else if (typeof config !== 'object' || config === null) {
+        throw new TypeError('The provided config argument needs to be an object or a path to the config file.', __filename);
+    }
+    if (typeof config.token !== 'string') {
+        throw new TypeError('The provided token needs to be a string.', __filename);
+    }
+    if (!config.embedColor) {
+        log('No embed color provided in config. Using #2E0854.', 'warn');
+    }
+
+    config.tags       = Object.assign(customfns ? customfns.tags || {} : {}, prebuilts.tags); // this, or if (!customfns) customfns = {}
+    config.replaces   = Object.assign(customfns ? customfns.replaces || {} : {}, prebuilts.replaces);
+    config.version    = require(join(__dirname, 'package.json')).version;
+    config.embedColor = config.embedColor ? resolveColor(config.embedColor) : parseInt('2E0854', '16');
+
+    const db = require('sqlite');
+    await db.open(join(absPath, 'database.db'));
+
+    return new Elga(config, db, absPath);
 };
+
+function resolveColor (color) {
+    if (typeof color === 'string') {
+        if (color === 'RANDOM') {
+            return Math.floor(Math.random() * (0xFFFFFF + 1));
+        }
+        color = Constants.Colors[color] || parseInt(color.replace('#', ''), 16);
+    } else if (color instanceof Array) {
+        color = (color[0] << 16) + (color[1] << 8) + color[2];
+    }
+
+    if (color < 0 || color > 0xFFFFFF) {
+        throw new RangeError('COLOR_RANGE');
+    } else if (color && isNaN(color)) {
+        throw new TypeError('COLOR_CONVERT');
+    }
+    return color;
+}
+
+process.on('unhandledRejection', err => {
+    log(`Unhandled rejection: \n${err.stack}`, 'error');
+});
+
+
+process.on('uncaughtException', err => {
+    log(`UNCAUGHT EXCEPTION: \n${err.stack}`, 'error');
+});
