@@ -1,26 +1,25 @@
-const fs = require('fs');
-const rebootdb = require(`${__dirname}/../resources/.reboot.json`);
-
 exports.run = async function (Elga, msg) {
     await msg.edit({ embed: {
         color: Elga.config.embedColor,
         author: { name: 'Rebooting...', icon_url: 'http://i.imgur.com/81nH7vJ.gif' }
     } });
 
-    await fs.writeFileSync(`${__dirname}/../resources/.reboot.json`, JSON.stringify({
-        'channelID': msg.channel.id,
-        'messageID': msg.id,
-        'startTime': Date.now()
-    }, '', '\t'));
+    const res = await Elga.db.get('SELECT * FROM reboot');
+    if (!res) {
+        await Elga.db.run('INSERT INTO reboot (channelID, messageID, startTime) VALUES (?, ?, ?)', msg.channel.id, msg.id, Date.now());
+    } else if (res) {
+        await Elga.db.run('UPDATE reboot SET channelID = ?, messageID = ?, startTime = ?', msg.channel.id, msg.id, Date.now());
+    }
     process.exit();
 };
 
 exports.boot = async function (Elga) {
-    if (!Elga.channels.get(rebootdb.channelID)) {
+    const res = await Elga.db.get('SELECT * FROM reboot LIMIT 1');
+    if (!Elga.channels.get(res.channelID)) {
         return;
     }
-    Elga.channels.get(rebootdb.channelID).fetchMessage(rebootdb.messageID).then(msg => {
-        const tStamp = Date.now() - rebootdb.startTime > 1000 ? `${(Date.now() - rebootdb.startTime) / 1000}s` : `${Date.now() - rebootdb.startTime}ms`;
+    Elga.channels.get(res.channelID).fetchMessage(res.messageID).then(msg => {
+        const tStamp = Date.now() - res.startTime > 1000 ? `${(Date.now() - res.startTime) / 1000}s` : `${Date.now() - res.startTime}ms`;
         msg.edit({ embed: {
             color: Elga.config.embedColor,
             description: 'Rebooted.',
