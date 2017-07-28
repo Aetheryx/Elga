@@ -1,4 +1,4 @@
-exports.run = function (msg, args) {
+exports.run = function (Elga, msg, args) {
     if (!args[0]) {
         return msg.edit({ embed: {
             title: `Commands (${Elga.commands.size})`,
