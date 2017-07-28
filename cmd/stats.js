@@ -4,9 +4,9 @@ const { version } = require('discord.js');
 require('moment-duration-format');
 
 exports.run = function (Elga, msg) {
-    const uptime =  process.uptime() < 60 ?
-                    `00:${process.uptime() > 10 ? process.uptime().toFixed() : `0${process.uptime().toFixed()}`}` : // eslint-disable-line prefer-template
-                    moment.duration(process.uptime(), 'seconds').format('dd:hh:mm:ss');
+    const uptime = process.uptime() < 60 ?
+        `00:${process.uptime() > 10 ? process.uptime().toFixed() : `0${process.uptime().toFixed()}`}` : // eslint-disable-line prefer-template
+        moment.duration(process.uptime(), 'seconds').format('dd:hh:mm:ss');
 
     msg.edit({ embed: {
         color: Elga.config.embedColor,

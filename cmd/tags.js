@@ -23,7 +23,7 @@ exports.run = async function (Elga, msg, args) {
     }
 
     if (args[0] === 'remove' || args[0] === 'delete') {
-        Elga.db.run('DELETE FROM tasdfgs WHERE TagName = ?', args[1])
+        Elga.db.run('DELETE FROM tags WHERE TagName = ?', args[1])
             .then(() => {
                 msg.edit(`Tag \`${args[1]}\` successfully deleted.`);
             })
