@@ -1,6 +1,6 @@
 exports.run = async function (Elga, msg, args) {
     if (!args[0]) {
-        Elga.db.all('SELECT * FROM tags')
+        Elga.db.all('SELECT * FROM tags ORDER BY TagName ASC')
             .then(res => {
                 msg.edit({ embed: {
                     title: `Tags (${res.length})`,
@@ -11,6 +11,7 @@ exports.run = async function (Elga, msg, args) {
             .catch(err => {
                 Elga.cmdErr(msg, err);
             });
+        return;
     }
 
     const tag = await Elga.db.get('SELECT * FROM tags WHERE TagName = ?', args[1] || args[0]);
