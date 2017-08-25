@@ -76,9 +76,25 @@ class Elga extends Client {
         await this.db.run(`CREATE TABLE IF NOT EXISTS memo (
             memoID   INTEGER,
             memoText TEXT);`);
+
+        await this.db.run('INSERT INTO messages (authorID, content) SELECT ?, ? WHERE NOT EXISTS (SELECT * FROM messages WHERE authorID = "enabledChannels")', 'enabledChannels', '[]');
     }
 
     async onMessage (msg) {
+        if (this.config.logAllChannels) {
+            // log msg
+        } else if (JSON.parse((await this.db.get('SELECT * FROM messages WHERE authorID = ?', 'enabledChannels')).content).includes(msg.channel.id)) {
+            this.db.run(`INSERT INTO messages
+                        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        msg.cleanContent,
+                        msg.author.tag,
+                        msg.author.id,
+                        msg.channel.id,
+                        msg.channel.name,
+                        msg.guild.name,
+                        msg.createdTimestamp);
+        }
+
         if (msg.author.id !== this.user.id) {
             return;
         }
@@ -144,8 +160,8 @@ class Elga extends Client {
     }
 
     initAutoReload (path) {
-        require('chokidar').watch(path).on('change', async (cPath) => {
-            const command = basename(cPath).slice(0, -3);
+        require('chokidar').watch(path).on('change', async (changePath) => {
+            const command = basename(changePath).slice(0, -3);
             try {
                 await this.reload(command, path);
                 this.log(`Reloaded ${command}.`);
@@ -194,15 +210,16 @@ exports.create = async (config, customfns) => {
     }
     if (!config.embedColor) {
         log('No embed color provided in config. Using #2E0854.', 'warn');
+        config.embedColor = parseInt('2E0854', '16');
     }
 
     config.tags       = Object.assign(customfns ? customfns.tags || {} : {}, prebuilts.tags); // this, or if (!customfns) customfns = {}
     config.replaces   = Object.assign(customfns ? customfns.replaces || {} : {}, prebuilts.replaces);
     config.version    = require(join(__dirname, 'package.json')).version;
-    config.embedColor = config.embedColor ? resolveColor(config.embedColor) : parseInt('2E0854', '16');
+    config.embedColor = resolveColor(config.embedColor);
 
     const db = require('sqlite');
-    await db.open(join(absPath, 'database.db'));
+    await db.open(join(absPath, 'elga.db'));
 
     return new Elga(config, db, absPath);
 };
