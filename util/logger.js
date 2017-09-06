@@ -1,11 +1,26 @@
 /* eslint-disable no-console */
 const chalk = require('chalk');
-module.exports = function (str, type) {
+const types = {
+    warn: 'warn',
+    error: 'error',
+    info: 'log'
+}
+module.exports = function (str, type, returnString) {
     if (type === 'warn') {
-        console.warn(chalk.yellow(`[${Date().toString().split(' ').slice(1, 5).join(' ')}, WARN] `) + str);
-    } else if (type === 'error') {
-        console.error(chalk.red(`[${Date().toString().split(' ').slice(1, 5).join(' ')}, ERROR] `) + str);
+        str = chalk.yellow(`[${Date().toString().split(' ').slice(1, 5).join(' ')}, WARN] `) + str;
+    }
+
+    if (type === 'error') {
+        str = chalk.red(`[${Date().toString().split(' ').slice(1, 5).join(' ')}, ERROR] `) + str;
+    }
+
+    if (!type || type === 'info') {
+        str = chalk.green(`[${Date().toString().split(' ').slice(1, 5).join(' ')}, INFO] `) + str;
+    }
+
+    if (returnString) {
+        return str;
     } else {
-        console.log(chalk.green(`[${Date().toString().split(' ').slice(1, 5).join(' ')}, INFO] `) + str);
+        console[types[type || 'info']](str);
     }
 };
