@@ -8,8 +8,7 @@ const types = {
     error: 'red',
     info: 'green'
 };
-const dl = require('draftlog')
-dl(console)
+require('draftlog').into(console);
 class Logger {
     constructor () {
         this.drafts = new Array();

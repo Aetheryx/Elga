@@ -45,7 +45,7 @@ class Elga extends Client {
             if (err) {
                 return this.logger.log(err.stack, 'error');
             }
-            this.logger.draft('commands', 'create', `Loading ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`)
+            this.logger.draft('commands', 'create', `Loading ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`);
             const stats = { fail: 0, succeed: 0 };
             files.forEach(file => {
                 try {
