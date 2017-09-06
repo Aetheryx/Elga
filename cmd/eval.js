@@ -10,7 +10,7 @@ exports.run = async function (Elga, msg, args) {
 
     let result;
     try {
-        result = asynchr ? eval(`(async()=>{return ${input}})();`) : eval(input);
+        result = asynchr ? eval(`(async()=>{${input}})();`) : eval(input);
         if (result instanceof Promise && asynchr) {
             result = await result;
         }
