@@ -16,6 +16,9 @@
     "url": "https://github.com/Aetheryx/Elga/issues"
   },
   "homepage": "https://github.com/Aetheryx/Elga#readme",
+  "devDependencies": {
+      "eslint": "^3.19.0"
+  },
   "dependencies": {
     "chalk": "^2.1.0",
     "chokidar": "^1.7.0",
