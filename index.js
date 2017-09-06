@@ -1,8 +1,10 @@
 const { Client, Collection, Constants } = require('discord.js');
 const fs = require('fs');
 const { join, basename } = require('path');
+require('draftlog').into(console);
 const prebuilts = require(join(__dirname, 'util', 'prebuilts.js'));
 const log = require(join(__dirname, 'util', 'logger.js'));
+const dots = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 
 class Elga extends Client {
     constructor (config, db, absPath) {
@@ -11,21 +13,55 @@ class Elga extends Client {
         this.log = log;
         this.db = db;
         this.initTables();
-        this.log('Why are you here? Go away. Elga is still in dev.\nSeriously though. Continue at your own risk. High RAM usage and bugs await you. Turn back while you can!!', 'warn');
-        this.log('Logging in..');
+        this.drafts = new Array();
+        this.log('WARNING', 'warn'); // TEMP
         this.commands = new Collection();
         this.aliases  = new Collection();
         this.config = config;
         this.commandCache = { reddit: [], fml: [] };
         this.loadCommands(join(__dirname, 'cmd'), true);
+        this.initBot();
+    }
+
+    sleep (ms) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve();
+            }, ms)
+        })
+    }
+
+    async draft (name, type, string) {
+        switch (type) {
+            case 'create': 
+            this.drafts.push({ spinning: true, name, string, draft: console.draft(this.log(`${dots[0]} ${string}`, 'info', true)) });
+            let index = 0;
+            while (this.drafts.find(draft => draft.name === name).spinning) {
+                await this.sleep(50);
+                this.drafts.find(draft => draft.name === name).draft(this.log(`${dots[index % 8]} ${string}`, 'info', true));
+                index++;
+            }
+
+
+            break;
+            case 'update':
+            this.drafts.find(draft => draft.name === name).spinning = false;
+            this.drafts.find(draft => draft.name === name).draft(this.log(string, 'info', true))
+            break;
+        }
+    }
+
+    initBot () {
         this.login(this.config.token);
         this.on('ready', this.onReady);
         this.once('ready', this.onceReady);
         this.on('message', this.onMessage);
+        this.draft('login', 'create', 'Logging in...')
     }
 
     onReady () {
-        this.log(`Logged in as ${this.user.tag}, running Elga v${this.config.version}.`);
+        this.draft('login', 'update', `Logged in as ${this.user.tag}, running Elga v${this.config.version}.`);
+        this.log('f');
         this.user.setGame(this.config.playingStatus);
         delete this.user.email;
     }
@@ -40,7 +76,7 @@ class Elga extends Client {
             if (err) {
                 return this.log(err, 'error');
             }
-            this.log(`Loading ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`);
+            const draft = console.draft(this.log(`Loading ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`, 'info', true));
 
             files.forEach(file => {
                 try {
@@ -51,6 +87,7 @@ class Elga extends Client {
                     this.log(`Error while loading ${file}:\n${err.stack}`, 'error');
                 }
             });
+            draft(this.log('Loaded commands successfully.', 'info', true));
         });
         if (this.config.autoReload) {
             this.initAutoReload(path);
