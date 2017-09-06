@@ -15,7 +15,7 @@ exports.run = async function (Elga, msg) {
 
 exports.boot = async function (Elga) {
     const res = await Elga.db.get('SELECT * FROM reboot LIMIT 1');
-    if (!Elga.channels.get(res.channelID)) {
+    if (!res || !Elga.channels.get(res.channelID)) {
         return;
     }
     Elga.channels.get(res.channelID).fetchMessage(res.messageID).then(msg => {
