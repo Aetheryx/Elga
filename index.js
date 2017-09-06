@@ -1,20 +1,18 @@
 const { Client, Collection, Constants } = require('discord.js');
 const fs = require('fs');
 const { join, basename } = require('path');
-require('draftlog').into(console);
 const prebuilts = require(join(__dirname, 'util', 'prebuilts.js'));
-const log = require(join(__dirname, 'util', 'logger.js'));
-const dots = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+const logger = require(join(__dirname, 'util', 'logger.js'));
+
 
 class Elga extends Client {
     constructor (config, db, absPath) {
         super(config.clientOptions || prebuilts.clientOptions);
         this.absPath = absPath;
-        this.log = log;
+        this.logger = logger;
         this.db = db;
         this.initTables();
-        this.drafts = new Array();
-        this.log('WARNING', 'warn'); // TEMP
+        this.logger.log('This is a very WIP bot. If you get IP banned or your machine blows up, you get to deal with it. ', 'warn');
         this.commands = new Collection();
         this.aliases  = new Collection();
         this.config = config;
@@ -23,45 +21,16 @@ class Elga extends Client {
         this.initBot();
     }
 
-    sleep (ms) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve();
-            }, ms)
-        })
-    }
-
-    async draft (name, type, string) {
-        switch (type) {
-            case 'create': 
-            this.drafts.push({ spinning: true, name, string, draft: console.draft(this.log(`${dots[0]} ${string}`, 'info', true)) });
-            let index = 0;
-            while (this.drafts.find(draft => draft.name === name).spinning) {
-                await this.sleep(50);
-                this.drafts.find(draft => draft.name === name).draft(this.log(`${dots[index % 8]} ${string}`, 'info', true));
-                index++;
-            }
-
-
-            break;
-            case 'update':
-            this.drafts.find(draft => draft.name === name).spinning = false;
-            this.drafts.find(draft => draft.name === name).draft(this.log(string, 'info', true))
-            break;
-        }
-    }
-
     initBot () {
         this.login(this.config.token);
         this.on('ready', this.onReady);
         this.once('ready', this.onceReady);
         this.on('message', this.onMessage);
-        this.draft('login', 'create', 'Logging in...')
+        this.logger.draft('login', 'create', 'Logging in...');
     }
 
     onReady () {
-        this.draft('login', 'update', `Logged in as ${this.user.tag}, running Elga v${this.config.version}.`);
-        this.log('f');
+        this.logger.draft('login', 'end', `Logged in as ${this.user.tag}, running Elga ${this.logger.chalk.green(`v${this.config.version}`)}.`);
         this.user.setGame(this.config.playingStatus);
         delete this.user.email;
     }
@@ -72,22 +41,24 @@ class Elga extends Client {
 
     loadCommands (path, prebuilt) {
         path = prebuilt ? join(__dirname, 'cmd') : join(this.absPath, path);
-        fs.readdir(path, (err, files) => {
+        fs.readdir(path, async (err, files) => {
             if (err) {
-                return this.log(err, 'error');
+                return this.logger.log(err.stack, 'error');
             }
-            const draft = console.draft(this.log(`Loading ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`, 'info', true));
-
+            this.logger.draft('commands', 'create', `Loading ${files.length} ${prebuilt ? 'default' : 'custom'} commands.`)
+            const stats = { fail: 0, succeed: 0 };
             files.forEach(file => {
                 try {
+                    stats.succeed++;
                     const command = require(join(path, file));
                     this.commands.set(command.props.name, command);
                     command.props.aliases.forEach(alias => this.aliases.set(alias, command.props.name));
                 } catch (err) {
-                    this.log(`Error while loading ${file}:\n${err.stack}`, 'error');
+                    stats.fail++;
+                    this.logger.log(`Error while loading ${file}:\n${err.stack}`, 'error');
                 }
             });
-            draft(this.log('Loaded commands successfully.', 'info', true));
+            setTimeout(() => this.logger.draft('commands', 'end', `Finished loading commands: ${this.logger.chalk.green(stats.succeed)} - ${this.logger.chalk.red(stats.fail)}\n`), 1000);
         });
         if (this.config.autoReload) {
             this.initAutoReload(path);
@@ -193,7 +164,7 @@ class Elga extends Client {
             title: ':warning: Something went wrong.',
             description: this.codeblock(err.stack.length < 1500 ? err.stack : err.message)
         } });
-        this.log(`Error while running command ${msg.content.slice(this.config.prefix.length).split(' ')[0]} with args ${JSON.stringify(msg.content.split(' ').slice(1))}:\n${err.stack}`, 'error');
+        this.logger.log(`Error while running command ${msg.content.slice(this.config.prefix.length).split(' ')[0]} with args ${JSON.stringify(msg.content.split(' ').slice(1))}:\n${err.stack}`, 'error');
     }
 
     initAutoReload (path) {
@@ -201,9 +172,9 @@ class Elga extends Client {
             const command = basename(changePath).slice(0, -3);
             try {
                 await this.reload(command, path);
-                this.log(`Reloaded ${command}.`);
+                this.logger.log(`Reloaded ${command}.`);
             } catch (err) {
-                this.log(`Failed to reload ${command},\n${err.stack}`, 'error');
+                this.logger.log(`Failed to reload ${command},\n${err.stack}`, 'error');
             }
         });
     }
@@ -246,7 +217,7 @@ exports.create = async (config, customfns) => {
         throw new TypeError('The provided token needs to be a string.', __filename);
     }
     if (!config.embedColor) {
-        log('No embed color provided in config. Using #2E0854.', 'warn');
+        logger.log('No embed color provided in config. Using #2E0854.', 'warn');
         config.embedColor = parseInt('2E0854', '16');
     }
 
@@ -280,10 +251,10 @@ function resolveColor (color) {
 }
 
 process.on('unhandledRejection', err => {
-    log(`Unhandled rejection: \n${err.stack}`, 'error');
+    logger.log(`Unhandled rejection: \n${err.stack}`, 'error');
 });
 
 
 process.on('uncaughtException', err => {
-    log(`UNCAUGHT EXCEPTION: \n${err.stack}`, 'error');
+    logger.log(`UNCAUGHT EXCEPTION: \n${err.stack}`, 'error');
 });
