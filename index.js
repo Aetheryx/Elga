@@ -12,7 +12,6 @@ class Elga extends Client {
         this.logger = logger;
         this.db = db;
         this.initTables();
-        this.logger.log('This is a very WIP bot. If you get IP banned or your machine blows up, you get to deal with it. ', 'warn');
         this.commands = new Collection();
         this.aliases  = new Collection();
         this.config = config;
@@ -22,21 +21,25 @@ class Elga extends Client {
     }
 
     initBot () {
-        this.login(this.config.token);
+        this.logger.draft('login', 'create', 'Logging in...');
+        this.login(this.config.token)
+            .catch(err => {
+                this.logger.draft('login', 'end', `Failed to log in! ${err}`, false);
+            });
         this.on('ready', this.onReady);
         this.once('ready', this.onceReady);
         this.on('message', this.onMessage);
-        this.logger.draft('login', 'create', 'Logging in...');
     }
 
     onReady () {
-        this.logger.draft('login', 'end', `Logged in as ${this.user.tag}, running Elga ${this.logger.chalk.green(`v${this.config.version}`)}.`);
+        this.logger.draft('login', 'end', `Logged in as ${this.user.tag}, running Elga ${this.logger.chalk.green(`v${this.config.version}`)}.`, true);
         this.user.setGame(this.config.playingStatus);
         delete this.user.email;
     }
 
     async onceReady () {
         require(join(__dirname, 'cmd', 'reboot.js')).boot(this);
+        this.logger.printStats(this);
     }
 
     loadCommands (path, prebuilt) {
@@ -58,7 +61,8 @@ class Elga extends Client {
                     this.logger.log(`Error while loading ${file}:\n${err.stack}`, 'error');
                 }
             });
-            setTimeout(() => this.logger.draft('commands', 'end', `Finished loading commands: ${this.logger.chalk.green(stats.succeed)} - ${this.logger.chalk.red(stats.fail)}\n`), 1000);
+            this.logger.draft('commands', 'end',
+                `Finished loading commands: ${this.logger.chalk.green(stats.succeed)} - ${this.logger.chalk.red(stats.fail)}\n`, true);
         });
         if (this.config.autoReload) {
             this.initAutoReload(path);
